@@ -1,6 +1,6 @@
-const validator = require('validator')
-	, ObjectId = require('mongoose').Types.ObjectId;
+const validator = require('validator');
+
 
 exports.isValidId = function (id) {
-	return ObjectId.isValid(validator.toString(id));
+	return validator.isMongoId(id);
 }

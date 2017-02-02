@@ -53,6 +53,7 @@ API.get('/auth/:mode/callback', function *() {
  * @return {JSON string} [rooms as JSON collections]
  */
 API.get('/rooms', function *() {
+	console.log('[GET /rooms handler start]');
 	this.body = yield RoomAPI.get();
 });
 
@@ -92,7 +93,7 @@ API.get('/users/:id', function *() {
 
 API.delete('/users/:id', function *() {
 	console.log(`[DELETE /users/${this.params.id} handler start]`);
-	
+
 	if (!this.isAuthenticated()) {
 		throw new cError.Unauthorized();
 	}
