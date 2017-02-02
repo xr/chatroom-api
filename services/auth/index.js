@@ -36,3 +36,7 @@ passport.use(new FacebookStrategy({
     });
   }
 ));
+
+exports.isAdmin = function (id) {
+  return config.admins.indexOf(id) !== -1;
+};

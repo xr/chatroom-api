@@ -12,7 +12,9 @@ const Router = require('koa-router')
 
 // load API config & related services
 const Auth = require('../../services/auth')
-	, config = require('../../config');
+	, config = require('../../config')
+	, utils = require('../../services/utils')
+	, cError = require('../../services/error');
 
 
 // initialize
@@ -21,7 +23,8 @@ const API = new Router();
 exports = module.exports = API;
 
 // register services
-const RoomAPI = require('../../services/room/api');
+const RoomAPI = require('../../services/room/api')
+	, UserAPI = require('../../services/user/api');
 
 /*===========================================
 =            Authentication Part            =
@@ -62,3 +65,52 @@ API.post('/rooms', function *() {
 	let content = this.request.body;
 	this.body = yield RoomAPI.upsert({}, content);
 });
+
+/*=======================================
+=            Users Endpoints            =
+=======================================*/
+
+/**
+ * GET users details
+ * @param {String} uid
+ * @return {JSON string} [user entity]
+ */
+API.get('/users/:id', function *() {
+	console.log(`[GET /users/${this.params.id} handler start]`);
+
+	if (!utils.isValidId(this.params.id)) {
+		throw new cError.BadRequest({
+			message: 'invalid user id'
+		});	
+	}
+
+	this.body = {
+		'status': 'success',
+		'data': yield UserAPI.find({ id: this.params.id })
+	}
+});
+
+API.delete('/users/:id', function *() {
+	console.log(`[DELETE /users/${this.params.id} handler start]`);
+	
+	if (!this.isAuthenticated()) {
+		throw new cError.Unauthorized();
+	}
+
+	if (!utils.isValidId(this.params.id)) {
+		throw new cError.BadRequest({
+			message: 'invalid user id'
+		});	
+	}
+
+	if (!Auth.isAdmin(this.req.user.id)) {
+		throw new cError.Forbidden();
+	}
+
+	this.body = {
+		'status': 'success',
+		'data': yield UserAPI.remove({ id: this.params.id })
+	}
+
+});
+

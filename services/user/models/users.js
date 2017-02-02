@@ -1,6 +1,9 @@
 const mongoose = require('mongoose')
   , Schema = mongoose.Schema;
 
+// replace the mongoose built-in Promise lib due to the warning
+mongoose.Promise = require('bluebird');
+
 const UserSchema = new Schema({
   'name' : { type: String },
   'fbid': { type: String, index: true, unique: true, required: true },

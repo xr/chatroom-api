@@ -12,7 +12,7 @@ exports.findOrCreate = function *(opts) {
 	let user;
 
 	let exists = yield UserModel.findOne({
-		'fbid': validator.escape(opts.id)
+		'fbid': opts.id
 	}).exec();
 
 	if (exists) {
@@ -20,11 +20,11 @@ exports.findOrCreate = function *(opts) {
 	} else {
 		user = new UserModel();
 		user.name = validator.trim(opts.displayName || opts.username);
-		user.fbid = validator.escape(opts.id);
+		user.fbid = opts.id;
 	}
 
 	let res = yield user.save();
-	return res[0];
+	return res;
 };
 
 /**
@@ -33,17 +33,17 @@ exports.findOrCreate = function *(opts) {
  * @return {document} existed user entity
  */
 exports.find = function *(opts) {
-	let user;
+	let user = yield UserModel.findOne({
+		_id: opts.id
+	}).exec();
 
-	if (opts.id) {
-		user = yield UserModel.findOne({
-			_id: validator.escape(opts.id)
-		}).exec();
-	} else {
-		throw new cError.BadRequest({
-			message: 'uid missing'
-		});
-	}
+	return user;
+}
+
+exports.remove = function *(opts) {
+	let user = yield UserModel.remove({
+		_id: opts.id
+	}).exec();
 
 	return user;
 }

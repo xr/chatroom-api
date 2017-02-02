@@ -18,7 +18,13 @@ const config = {
 			clientID: process.env.OAUTH_FB_CLIENTID || 'please enter yours',
 			clientSecret: process.env.OAUTH_FB_SECRET || 'please enter yours',
 		}
-	}
+	},
+	// the users who have these ids will have admin right.
+	admins: process.env.API_ADMIN_IDS || ''
 };
+
+if (config.admins !== '') {
+	config.admins = config.admins.split(',');
+}
 
 exports = module.exports = config;

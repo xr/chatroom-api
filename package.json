@@ -5,12 +5,14 @@
   "main": "index.js",
   "scripts": {
     "start": "./node_modules/.bin/nf start -e ./env.txt",
-    "test": "./node_modules/.bin/mocha ./test/index.js --reporter spec"
+    "test": "./node_modules/.bin/mocha ./test/config.js ./test/index.js --reporter spec"
   },
   "author": "liang",
   "license": "ISC",
   "repository": {},
   "dependencies": {
+    "bluebird": "^3.4.7",
+    "chai": "^3.5.0",
     "co": "^4.6.0",
     "koa": "^1.2.4",
     "koa-bodyparser": "^2.3.0",

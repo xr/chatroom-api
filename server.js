@@ -20,13 +20,7 @@ const config = require('./config')
 
 mongoose.connect(config.mongo.url);
 
-/**
- * solve the mongoose mpromise warning
- * ref: https://github.com/Automattic/mongoose/issues/4291
- */
-mongoose.Promise = global.Promise;
-
-var db = mongoose.connection;
+const db = mongoose.connection;
 db.on('error', console.error.bind(console, '[DATABASE] MongoDB connection error:'));
 db.once('open', function callback () {
   console.info('[DATABASE] MongoDB connected');
@@ -63,8 +57,8 @@ app.use(function *(next) {
 	} catch (err) {
 		this.status = err.status || 500;
 		this.body = {
-			"status": 'error',
-			"message": err.message
+			'status': 'error',
+			'message': err.message
 		};
 		console.warn(`[HTTP REST server] app error: ${this.status} ${this.request.method} ${this.request.url} ${this.body.message}`);
   	}
