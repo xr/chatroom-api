@@ -19,6 +19,13 @@ const config = require('./config')
 
 
 mongoose.connect(config.mongo.url);
+
+/**
+ * solve the mongoose mpromise warning
+ * ref: https://github.com/Automattic/mongoose/issues/4291
+ */
+mongoose.Promise = global.Promise;
+
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, '[DATABASE] MongoDB connection error:'));
 db.once('open', function callback () {

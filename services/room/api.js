@@ -6,18 +6,17 @@
  */
 'use strict';
 
-const mongoose = require('mongoose')
-	, validator = require('validator');
-
-const Room = require('./models/rooms')
-	, cError = require('../error');
+const validator = require('validator')
+	, Room = require('./models/rooms')
+	, cError = require('../error')
+	, RoomModel = Room.Model;
 
 /**
- * get Rooms
+ * get Rooms or room if provide id
  * @param {object} opts
- * @return {collections}
+ * @return {collections} or {document}
  */
-exports.getRooms = function *(opts) {
+exports.get = function *(opts) {
 	return [{
 		'name': 'test1'
 	}, {
@@ -26,28 +25,35 @@ exports.getRooms = function *(opts) {
 };
 
 /**
- * create a new room
+ * create a new room or update one
  * @param {object} opts
  * @param {object} fields
  * @return {document}
  */
-exports.createRoom = function *(opts, fields) {
+exports.upsert = function *(opts, fields) {
+	let res;
+	let errMsg;
 	let data = {};
 
-	data.title = validator.trim(fields.title);
-	data.desc = validator.trim(fields.desc);
-
-	// validate
-	let editError;
-	if (data.title === '') {
-		editError = 'You must give a title';
+	if (fields.title) {
+		data.title = validator.escape(validator.trim(fields.title));
+		if (validator.isEmpty(data.title)) {
+			errMsg = 'You must give a title';
+		}
 	}
 
-	if (editError) {
-		// TODO: handle error nicely
+	if (fields.desc) {
+		data.desc = validator.escape(validator.trim(fields.desc));
 	}
 
-	let room = new Room.Model(data);
-	let res = yield room.save();
+	if (errMsg) throw new cError.BadRequest({ message: errMsg });
+
+	if (opts.id) {
+		// update
+	} else {
+		let room = new RoomModel(data);
+		res = yield room.save();
+	}
+
 	return res;
 }

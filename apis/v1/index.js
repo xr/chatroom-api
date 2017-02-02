@@ -50,7 +50,7 @@ API.get('/auth/:mode/callback', function *() {
  * @return {JSON string} [rooms as JSON collections]
  */
 API.get('/rooms', function *() {
-	this.body = yield RoomAPI.getRooms();
+	this.body = yield RoomAPI.get();
 });
 
 /**
@@ -60,5 +60,5 @@ API.get('/rooms', function *() {
  */
 API.post('/rooms', function *() {
 	let content = this.request.body;
-	this.body = yield RoomAPI.createRoom({}, content);
+	this.body = yield RoomAPI.upsert({}, content);
 });
