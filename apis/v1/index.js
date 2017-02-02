@@ -27,3 +27,19 @@ const RoomAPI = require('../../services/room/api');
 API.get('/rooms', function *() {
 	this.body = yield RoomAPI.getRooms();
 });
+
+/**
+ * POST /rooms
+ * Create a new room
+ * @return {JSON string} [newly created room]
+ */
+API.post('/rooms', function *() {
+	let content = this.request.body;
+	try {
+		this.body = yield RoomAPI.createRoom({
+		}, content);
+	} catch (e) {
+		// TODO: better error handling
+		console.error(e);
+	}
+});

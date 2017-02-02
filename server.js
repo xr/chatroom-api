@@ -9,10 +9,20 @@
 const config = require('./config')
 	, path = require('path')
 	, mount = require('koa-mount')
+	, bodyparser = require('koa-bodyparser')
+	, mongoose = require("mongoose")
+	, session = require('koa-session')
 	, koa = require('koa')
 	, api = require('./apis')
 	, app = koa();
 
+
+mongoose.connect(config.mongo.url);
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, '[DATABASE] MongoDB connection error:'));
+db.once('open', function callback () {
+  console.info('[DATABASE] MongoDB connected');
+});
 
 /**
  * @name response time counter
@@ -24,6 +34,15 @@ app.use(function *(next){
 	this.set('X-Response-Time', ms + 'ms');
 });
 
+app.keys = config.server.secrets;
+
+
+/**
+ * @name resolve form or JSON paramter into JS object
+ */
+app.use(bodyparser());
+
+app.use(session(app));
 
 /**
  * @name server error handler
@@ -86,74 +105,3 @@ app.on('uncaughtException', (err) => {
 	console.error('HTTP server/uncaughtException:', err);
 	exit(1);
 });
-
-/**
- * @event catch ctrl-c
- */
-process.on('SIGINT', () => {
-	console.warn("HTTP server/Received SIGINT");
-	serverShutdown();
-});
-
-/**
- * @event catch shutdown message
- */
-process.on('message', (msg) => {
-	if (msg == 'shutdown') {
-		console.warn("HTTP server/Received 'shutdown' message");
-		serverShutdown();
-	}
-});
-
-/**
- * @event catch sigterm
- */
-process.on('SIGTERM', () => {
-	console.warn("HTTP server/Received SIGTERM");
-	serverShutdown();
-});
-
-/**
- * @event catch server close message
- */
-server.on('close', () => {
-	console.info("HTTP server closed");
-	/**
-	
-		TODO:
-		- close DB connections
-		- shutdown all services
-	
-	 */
-	
-	// need to be handled after shutdown complete
-	if (closingTimeout !== undefined) {
-      clearTimeout(closingTimeout);
-    }
-	
-	process.exit();
-});
-
-/**
- * @event catch process exit event
- */
-process.on('exit', () => {
-	console.warn("--------------------------- HTTP API server EXIT ------------------------");
-});
-
-
-// handle server shutdown
-let closingDown = false;
-let closingTimeout;
-
-function serverShutdown() {
-	if (!closingDown && !!server) {
-		closingDown = true;
-		closingTimeout = setTimeout(function() {
-			console.warn('HTTP server/Graceful shutdown failed -- forcing exit');
-			process.exit(1);
-		}, 15000);
-		console.warn("HTTP server/API server shutdown sequence...");
-		server.close();
-	}
-}
