@@ -10,6 +10,7 @@ const config = require('./config')
 	, path = require('path')
 	, mount = require('koa-mount')
 	, bodyparser = require('koa-bodyparser')
+	, passport = require('koa-passport')
 	, mongoose = require("mongoose")
 	, session = require('koa-session')
 	, koa = require('koa')
@@ -43,6 +44,8 @@ app.keys = config.server.secrets;
 app.use(bodyparser());
 
 app.use(session(app));
+app.use(passport.initialize());
+app.use(passport.session());
 
 /**
  * @name server error handler
@@ -52,31 +55,12 @@ app.use(function *(next) {
 		yield next;
 	} catch (err) {
 		this.status = err.status || 500;
-		this.set('Content-Type', 'text/plain');
-		switch (this.status) {
-			case 400:
-				this.body = "Bad Request";
-				if (err.message) this.body += `: ${err.message}`;
-				break;
-			case 401:
-				this.body = "Unauthorized";
-				if (err.message) this.body += `: ${err.message}`;
-				break;
-			case 404:
-				this.body = "Not Found";
-				if (err.message) this.body += `: ${err.message}`;
-				break;
-			case 405:
-				this.body = "Method Not Allowed";
-				if (err.message) this.body += `: ${err.message}`;
-				break;
-			default:
-				console.error("error stack: ", err);
-				this.body = "Gosh! Something went wrong...";
-				break;
-	}
-	console.warn(`[HTTP REST server] app error: ${this.status} ${this.request.method} ${this.request.url} ${this.body}`);
-  }
+		this.body = {
+			"status": 'error',
+			"message": err.message
+		};
+		console.warn(`[HTTP REST server] app error: ${this.status} ${this.request.method} ${this.request.url} ${this.body.message}`);
+  	}
 });
 
 /**

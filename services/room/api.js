@@ -9,7 +9,8 @@
 const mongoose = require('mongoose')
 	, validator = require('validator');
 
-const Room = require('./models/rooms');
+const Room = require('./models/rooms')
+	, cError = require('../error');
 
 /**
  * get Rooms

@@ -8,6 +8,9 @@ const config = {
 	},
 	mongo: {
 		url: process.env.API_SERVER_MONGODB_URL || 'mongodb://localhost:27017/chat'
+	},
+	app: {
+		url: 'http://xr.com'
 	}
 };
 
