@@ -6,7 +6,7 @@ mongoose.Promise = require('bluebird');
 
 const UserSchema = new Schema({
   'name' : { type: String },
-  'fbid': { type: String, index: true, unique: true, required: true },
+  'fbid': { type: String, unique: true, required: true },
   'sign' : { type: String },
   'blocked' : {type: Boolean, default: false },
   'created' : { type: Date, default: Date.now },

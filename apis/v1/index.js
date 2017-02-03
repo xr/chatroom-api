@@ -49,12 +49,23 @@ API.get('/auth/:mode/callback', function *() {
 
 /**
  * GET /rooms
+ * @param {string} [page]
+ * @param {string} [pre_page]
+ * @param {string} [keyword]
  * Return a list of rooms.
  * @return {JSON string} [rooms as JSON collections]
  */
 API.get('/rooms', function *() {
 	console.log('[GET /rooms handler start]');
-	this.body = yield RoomAPI.get();
+
+	this.body = {
+		'status': 'success',
+		'data': yield RoomAPI.find({
+			page: Number(this.request.query.page) || 1,
+			per_page: Number(this.request.query.per_page) || 10,
+			keyword: this.request.query.keyword || null
+		})
+	}
 });
 
 /**
@@ -63,8 +74,43 @@ API.get('/rooms', function *() {
  * @return {JSON string} [newly created room]
  */
 API.post('/rooms', function *() {
+	console.log('[POST /rooms handler start]');
+
+	if (!this.isAuthenticated()) {
+		throw new cError.Unauthorized();
+	}
+
 	let content = this.request.body;
-	this.body = yield RoomAPI.upsert({}, content);
+
+	this.body = {
+		'status': 'success',
+		'data': yield RoomAPI.upsert({ auth_user: this.req.user }, content)
+	};
+});
+
+/**
+ * PUT /rooms/:id
+ * update a room
+ * @return {JSON string} [updated room]
+ */
+API.put('/rooms/:id', function *() {
+	console.log(`[PUT /rooms/${this.params.id} handler start]`);
+
+	if (!utils.isValidId(this.params.id)) {
+		throw new cError.BadRequest({
+			message: 'invalid room id'
+		});	
+	}
+
+	if (!this.isAuthenticated()) {
+		throw new cError.Unauthorized();
+	}
+
+	let content = this.request.body;
+	this.body = {
+		'status': 'success',
+		'data': yield RoomAPI.upsert({ auth_user: this.req.user, id: this.params.id }, content)
+	};
 });
 
 /*=======================================

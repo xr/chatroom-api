@@ -9,19 +9,39 @@
 const validator = require('validator')
 	, Room = require('./models/rooms')
 	, cError = require('../error')
+	, Auth = require('../auth')
 	, RoomModel = Room.Model;
 
 /**
- * get Rooms or room if provide id
+ * find Rooms or room if provide id
  * @param {object} opts
  * @return {collections} or {document}
  */
-exports.get = function *(opts) {
-	return [{
-		'name': 'test1'
-	}, {
-		'name': 'test2'
-	}];
+exports.find = function *(opts) {
+	let rooms
+		, query
+		, params = {};
+
+	let res = {
+		page: opts.page,
+		per_page: opts.per_page,
+		rooms: []
+	};
+
+	if (!!opts.keyword) {
+		params.title = {'$regex': validator.escape(validator.trim(opts.keyword)), '$options': 'i'};
+	}
+
+	query = RoomModel.find(params)
+			.populate('owner')
+			.sort('-created')
+			.where('removed').equals(false)
+			.skip((res.page - 1) * res.per_page)
+			.limit(res.per_page);
+
+	rooms = yield query.exec();
+	res.rooms = rooms.map((r) => r.toObject({ virtuals: true, versionKey: false }));
+	return res;
 };
 
 /**
@@ -31,9 +51,10 @@ exports.get = function *(opts) {
  * @return {document}
  */
 exports.upsert = function *(opts, fields) {
-	let res;
-	let errMsg;
-	let data = {};
+	let res
+		, errMsg
+		, room
+		, data = {};
 
 	if (fields.title) {
 		data.title = validator.escape(validator.trim(fields.title));
@@ -50,9 +71,35 @@ exports.upsert = function *(opts, fields) {
 
 	if (opts.id) {
 		// update
+		room = yield RoomModel.findOne({ _id: opts.id }).exec();
+
+		if (!room) {
+			throw new cError.NotFound({ message: 'room does not exist' })
+		}
+
+		if ((room.owner.toString() === opts.auth_user._id.toString()) || Auth.isAdmin(opts.auth_user.id)) {
+			if (fields.title) {
+				room.title = fields.title;
+			}
+
+			if (fields.desc) {
+				room.desc = fields.desc;
+			}
+
+		} else {
+			throw new cError.Forbidden();
+		}
 	} else {
-		let room = new RoomModel(data);
+		data.owner = opts.auth_user._id;
+		room = new RoomModel(data);
+	}
+
+	try {
 		res = yield room.save();
+	} catch (e) {
+		if (e.code === 11000) {
+			throw new cError.Conflict({ message: 'room name already exists' });
+		}
 	}
 
 	return res;

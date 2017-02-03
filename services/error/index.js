@@ -28,13 +28,22 @@ const NotFound = function (obj) {
 	return this;
 }
 
+const Conflict = function (obj) {
+	obj = obj || {};
+	this.message = obj.message || 'duplicate resource';
+	this.status = obj.status || 409;
+	return this;
+}
+
 
 util.inherits(BadRequest, Error);
 util.inherits(Unauthorized, Error);
 util.inherits(Forbidden, Error);
 util.inherits(NotFound, Error);
+util.inherits(Conflict, Error);
 
 exports.BadRequest = BadRequest;
 exports.Unauthorized = Unauthorized;
 exports.Forbidden = Forbidden;
 exports.NotFound = NotFound;
+exports.Conflict = Conflict;
