@@ -2,6 +2,7 @@ const request = require('supertest')
 	, app = require('../../server')
 	, agent = request.agent(app)
 	, co = require('co')
+	, config = require('../../config')
 	, should = require('chai').should()
 	, passportMock = require('../mocks/passport-mock')
 	, userAPI = require('../../services/user/api');
@@ -115,18 +116,25 @@ describe('Users endpoints (authentication required)', function() {
 			.expect(403, {
 				status: 'error',
 				message: 'forbidden'
-			}, done);
+			}, function (err, res) {
+				if (!err) {
+					// add the testuser to admin list
+					config.admins = [testuser._id.toString()];
+					done();
+				} else {
+					done(err);
+				}
+			});
 	});
 });
 
-// TODO: add admin required test suites
 
-after(function () {
-	console.log("test done, clean up data...");
-	co(function *() {
-		// remove the test user
-		yield userAPI.remove({
-			id: testuser._id
-		});
+describe('Users endpoints (admin required)', function() {
+	it('should remove user', function (done) {
+		agent
+			.delete(`/api/v1/users/${testuser._id}`)
+			.set('Accept', 'application/json')
+			.expect('Content-Type', /json/)
+			.expect(200, done);
 	});
 });
