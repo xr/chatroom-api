@@ -87,7 +87,7 @@ exports.upsert = function *(opts, fields) {
 			}
 
 		} else {
-			throw new cError.Forbidden();
+			throw new cError.Forbidden({ message: 'you do not have right to modify this room' });
 		}
 	} else {
 		data.owner = opts.auth_user._id;
