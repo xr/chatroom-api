@@ -1,6 +1,8 @@
 const User = require('./models/users')
 	, validator = require('validator')
 	, cError = require('../error')	
+	, utils = require('../utils')
+	, Auth = require('../auth')
 	, UserModel = User.Model;
 
 /**
@@ -33,6 +35,13 @@ exports.findOrCreate = function *(opts) {
  * @return {document} existed user entity
  */
 exports.find = function *(opts) {
+
+	if (!utils.isValidId(opts.id)) {
+		throw new cError.BadRequest({
+			message: 'invalid user id'
+		});	
+	}
+
 	let user = yield UserModel.findOne({
 		_id: opts.id
 	}).exec();
@@ -41,6 +50,20 @@ exports.find = function *(opts) {
 }
 
 exports.remove = function *(opts) {
+	if (!opts.auth_user) {
+		throw new cError.Unauthorized();
+	}
+
+	if (!utils.isValidId(opts.id)) {
+		throw new cError.BadRequest({
+			message: 'invalid user id'
+		});	
+	}
+
+	if (!Auth.isAdmin(opts.auth_user._id.toString())) {
+		throw new cError.Forbidden();
+	}
+
 	let user = yield UserModel.remove({
 		_id: opts.id
 	}).exec();

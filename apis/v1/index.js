@@ -11,10 +11,7 @@ const Router = require('koa-router')
 	, passport = require('koa-passport');
 
 // load API config & related services
-const Auth = require('../../services/auth')
-	, config = require('../../config')
-	, utils = require('../../services/utils')
-	, cError = require('../../services/error');
+const config = require('../../config');
 
 
 // initialize
@@ -76,15 +73,9 @@ API.get('/rooms', function *() {
 API.post('/rooms', function *() {
 	console.log('[POST /rooms handler start]');
 
-	if (!this.isAuthenticated()) {
-		throw new cError.Unauthorized();
-	}
-
-	let content = this.request.body;
-
 	this.body = {
 		'status': 'success',
-		'data': yield RoomAPI.upsert({ auth_user: this.req.user }, content)
+		'data': yield RoomAPI.upsert({ auth_user: this.req.user }, this.request.body)
 	};
 });
 
@@ -96,20 +87,9 @@ API.post('/rooms', function *() {
 API.put('/rooms/:id', function *() {
 	console.log(`[PUT /rooms/${this.params.id} handler start]`);
 
-	if (!utils.isValidId(this.params.id)) {
-		throw new cError.BadRequest({
-			message: 'invalid room id'
-		});	
-	}
-
-	if (!this.isAuthenticated()) {
-		throw new cError.Unauthorized();
-	}
-
-	let content = this.request.body;
 	this.body = {
 		'status': 'success',
-		'data': yield RoomAPI.upsert({ auth_user: this.req.user, id: this.params.id }, content)
+		'data': yield RoomAPI.upsert({ auth_user: this.req.user, id: this.params.id }, this.request.body)
 	};
 });
 
@@ -125,39 +105,24 @@ API.put('/rooms/:id', function *() {
 API.get('/users/:id', function *() {
 	console.log(`[GET /users/${this.params.id} handler start]`);
 
-	if (!utils.isValidId(this.params.id)) {
-		throw new cError.BadRequest({
-			message: 'invalid user id'
-		});	
-	}
-
 	this.body = {
 		'status': 'success',
 		'data': yield UserAPI.find({ id: this.params.id })
-	}
+	};
 });
 
+/**
+ * Delete one user
+ * @param {String} uid
+ * @return {[JSON string]}
+ */
 API.delete('/users/:id', function *() {
 	console.log(`[DELETE /users/${this.params.id} handler start]`);
 
-	if (!this.isAuthenticated()) {
-		throw new cError.Unauthorized();
-	}
-
-	if (!utils.isValidId(this.params.id)) {
-		throw new cError.BadRequest({
-			message: 'invalid user id'
-		});	
-	}
-
-	if (!Auth.isAdmin(this.req.user.id)) {
-		throw new cError.Forbidden();
-	}
-
 	this.body = {
 		'status': 'success',
-		'data': yield UserAPI.remove({ id: this.params.id })
-	}
+		'data': yield UserAPI.remove({ auth_user: this.req.user, id: this.params.id })
+	};
 
 });
 

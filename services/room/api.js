@@ -10,6 +10,7 @@ const validator = require('validator')
 	, Room = require('./models/rooms')
 	, cError = require('../error')
 	, Auth = require('../auth')
+	, utils = require('../utils')
 	, RoomModel = Room.Model;
 
 /**
@@ -51,26 +52,23 @@ exports.find = function *(opts) {
  * @return {document}
  */
 exports.upsert = function *(opts, fields) {
+	// authentication check
+	if (!opts.auth_user) {
+		throw new cError.Unauthorized();
+	}
+
 	let res
-		, errMsg
 		, room
 		, data = {};
 
-	if (fields.title) {
-		data.title = validator.escape(validator.trim(fields.title));
-		if (validator.isEmpty(data.title)) {
-			errMsg = 'You must give a title';
-		}
-	}
-
-	if (fields.desc) {
-		data.desc = validator.escape(validator.trim(fields.desc));
-	}
-
-	if (errMsg) throw new cError.BadRequest({ message: errMsg });
-
 	if (opts.id) {
 		// update
+		if (!utils.isValidId(opts.id)) {
+			throw new cError.BadRequest({
+				message: 'invalid room id'
+			});	
+		}
+		
 		room = yield RoomModel.findOne({ _id: opts.id }).exec();
 
 		if (!room) {
@@ -81,15 +79,25 @@ exports.upsert = function *(opts, fields) {
 			if (fields.title) {
 				room.title = fields.title;
 			}
-
 			if (fields.desc) {
 				room.desc = fields.desc;
 			}
-
 		} else {
 			throw new cError.Forbidden({ message: 'you do not have right to modify this room' });
 		}
 	} else {
+		// create
+		if (fields.title) {
+			data.title = validator.escape(validator.trim(fields.title));
+			if (validator.isEmpty(data.title)) {
+				throw new cError.BadRequest({ message: 'You must give a title' });
+			}
+		}
+
+		if (fields.desc) {
+			data.desc = validator.escape(validator.trim(fields.desc));
+		}
+
 		data.owner = opts.auth_user._id;
 		room = new RoomModel(data);
 	}

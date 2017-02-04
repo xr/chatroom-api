@@ -49,9 +49,9 @@ describe('Rooms endpoints', function() {
 			.field('title', 'test')
 			.field('desc', 'test')
 			.expect('Content-Type', /json/)
-			.expect(400, {
+			.expect(401, {
 				status: 'error',
-				message: 'invalid room id'
+				message: 'unauthorized'
 			}, done);
 	});
 });
@@ -81,6 +81,17 @@ describe('Rooms endpoints (authentication required)', function() {
 				res.body.data.should.have.property('owner', TEST.users[0]._id.toString());
 			})
 			.expect(200, done);
+	});
+	it('should return 400 when update room with wrong id', function(done) {
+		TEST.agent
+			.put('/api/v1/rooms/123')
+			.field('title', 'test')
+			.field('desc', 'test')
+			.expect('Content-Type', /json/)
+			.expect(400, {
+				status: 'error',
+				message: 'invalid room id'
+			}, done);
 	});
 	it('should return 404 if the room does not exist', function (done) {
 		TEST.agent
