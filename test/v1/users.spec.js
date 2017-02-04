@@ -36,6 +36,17 @@ describe('Users endpoints', function() {
 			}, done);
 	});
 
+	it('should return 404 when user does not exist', function (done) {
+		request(app)
+			.get('/api/v1/users/5895ceb9bc62a4c4c18f0d4d')
+			.set('Accept', 'application/json')
+			.expect('Content-Type', /json/)
+			.expect(404, {
+				status: 'error',
+				message: 'user does not exist'
+			}, done);
+	});
+
 	it('should return 401 when try to remove a user when unauth', function(done) {
 		request(app)
 			.delete(`/api/v1/users/${TEST.users[0]._id}`)

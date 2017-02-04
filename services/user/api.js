@@ -7,7 +7,7 @@ const User = require('./models/users')
 
 /**
  * find user or create if not exist
- * @param {object} opts
+ * @param {Object} opts
  * @return {document} newly created or existed user entity
  */
 exports.findOrCreate = function *(opts) {
@@ -31,7 +31,7 @@ exports.findOrCreate = function *(opts) {
 
 /**
  * get user details
- * @param {object} opts
+ * @param {Object} opts
  * @return {document} existed user entity
  */
 exports.find = function *(opts) {
@@ -45,6 +45,12 @@ exports.find = function *(opts) {
 	let user = yield UserModel.findOne({
 		_id: opts.id
 	}).exec();
+
+	if (!user) {
+		throw new cError.NotFound({
+			message: 'user does not exist'
+		});
+	}
 
 	return user;
 }

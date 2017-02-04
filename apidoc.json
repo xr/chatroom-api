@@ -1,0 +1,7 @@
+{
+  "name": "chatapi",
+  "template": {
+  	"withCompare": false,
+  	"withGenerator": false
+  }
+}

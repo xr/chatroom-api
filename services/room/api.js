@@ -15,7 +15,7 @@ const validator = require('validator')
 
 /**
  * find Rooms or room if provide id
- * @param {object} opts
+ * @param {Object} opts
  * @return {collections} or {document}
  */
 exports.find = function *(opts) {
@@ -47,8 +47,8 @@ exports.find = function *(opts) {
 
 /**
  * create a new room or update one
- * @param {object} opts
- * @param {object} fields
+ * @param {Object} opts
+ * @param {Object} fields
  * @return {document}
  */
 exports.upsert = function *(opts, fields) {
