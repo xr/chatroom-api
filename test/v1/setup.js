@@ -1,5 +1,5 @@
 const request = require('supertest')
-	, app = require('../../server')
+	, app = require('../../server').server
 	, agent = request.agent(app)
 	, co = require('co')
 	, should = require('chai').should()

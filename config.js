@@ -20,7 +20,8 @@ const config = {
 		}
 	},
 	// the users who have these ids will have admin right.
-	admins: process.env.API_ADMIN_IDS || ''
+	admins: process.env.API_ADMIN_IDS || '',
+	env: process.env.ENV || 'production'
 };
 
 if (config.admins !== '') {

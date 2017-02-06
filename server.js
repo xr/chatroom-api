@@ -12,14 +12,17 @@ const config = require('./config')
 	, bodyparser = require('koa-bodyparser')
 	, passport = require('koa-passport')
 	, mongoose = require("mongoose")
-	, session = require('koa-session')
+	, session = require('koa-generic-session')
+	, cookie = require('cookie')
 	, koa = require('koa')
 	, api = require('./apis')
-	, app = koa();
+	, co = require('co')
+	, app = koa()
+	, MongooseStore = require('koa-session-mongoose')
+	, sessionStore = new MongooseStore();
 
 
 mongoose.connect(config.mongo.url);
-
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, '[DATABASE] MongoDB connection error:'));
 db.once('open', function callback () {
@@ -36,6 +39,13 @@ app.use(function *(next){
 	this.set('X-Response-Time', ms + 'ms');
 });
 
+if (config.env !== 'production') {
+	app.use(require('koa-cors')({
+		credentials: true
+	}));
+	console.warn('Warning: CORS enabled from all sources!');
+}
+
 app.keys = config.server.secrets;
 
 
@@ -44,9 +54,53 @@ app.keys = config.server.secrets;
  */
 app.use(bodyparser());
 
-app.use(session(app));
+app.use(session({
+	store: sessionStore
+}));
 app.use(passport.initialize());
 app.use(passport.session());
+
+/**
+ * @name set up websockets and mount under app
+ */
+const socketIO = require("socket.io");
+app.server = require('http').createServer(app.callback());
+app.listen = function () {
+	app.server.listen.apply(app.server, arguments);
+	return app.server;
+};
+
+const io = new socketIO(app.server);
+io.use((socket, next) => {
+	const sid = cookie.parse(socket.handshake.headers.cookie)['koa.sid'];
+	co(function *() {
+		const session = yield sessionStore.get(`koa:sess:${sid}`);
+		if (session) {
+			next(null, true);	
+		} else {
+			next(new Error('Hey, I don\'t know who you are, please login first.'));
+		}
+	 });
+});
+
+io.on('connection', (socket) => {
+	app.ws = socket;
+	socket.on('message', function (msg) {
+		// Then our socket established!
+		// 
+		// ----- one corner case ------
+		// The user's session might be expired after establishing an authenticated socket,
+		// they can continue sending messages to the server without futher authentication
+		// but we can ignore it for now, since the problem only happen when the user keep the 
+		// page active and last for 1 day (max-age). Even this happened, the user still valid
+		// him/herself before
+		// 
+		// Therefore, from this point on, just trust the uid from client side and do whatever.
+		
+		console.log('msg', msg);
+	});
+	console.log('[Socket server] connected.');
+});
 
 /**
  * @name server error handler
@@ -79,8 +133,7 @@ for (let a in api) {
  */
 console.info('Serving the API from port %s', config.server.port);
 const server = app.listen(config.server.port);
-exports = module.exports = server;
-
+module.exports = app;
 
 /**
  * @event uncaughtException catcher

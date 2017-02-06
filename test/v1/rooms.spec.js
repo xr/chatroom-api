@@ -1,5 +1,5 @@
 const request = require('supertest')
-	, app = require('../../server')
+	, app = require('../../server').server
 	, should = require('chai').should()
 	, TEST = require('./setup');
 
