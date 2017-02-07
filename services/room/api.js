@@ -86,6 +86,9 @@ exports.upsert = function *(opts, fields) {
 			if (fields.uid) {
 				room.users.push(fields.uid);
 			}
+			if (fields.logo) {
+				room.logo = fields.logo;
+			}
 		} else {
 			throw new cError.Forbidden({ message: 'you do not have right to modify this room' });
 		}
@@ -100,6 +103,10 @@ exports.upsert = function *(opts, fields) {
 
 		if (fields.desc) {
 			data.desc = validator.escape(validator.trim(fields.desc));
+		}
+
+		if (fields.private) {
+			data.private = true;
 		}
 
 		data.owner = opts.auth_user._id;
