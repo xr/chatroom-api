@@ -57,6 +57,17 @@ describe('Users endpoints', function() {
 				message: 'unauthorized'
 			}, done);
 	});
+
+	it('should return 401 when update user without login', function (done) {
+		request(app)
+			.put(`/api/v1/users/${TEST.users[0]._id}`)
+			.set('Accept', 'application/json')
+			.expect('Content-Type', /json/)
+			.expect(401, {
+				status: 'error',
+				message: 'unauthorized'
+			}, done);
+	});
 });
 
 /*=====================================
@@ -73,6 +84,13 @@ describe('Users endpoints (authentication required)', function() {
 				status: 'error',
 				message: 'invalid user id'
 			}, done);
+	});
+
+	it('should return 403 when update others', function (done) {
+		TEST.agent
+			.put(`/api/v1/users/${TEST.users[TEST.users.length - 1]._id}`)
+			.expect('Content-Type', /json/)
+			.expect(403, done);
 	});
 
 	it('should pass the auth part and valid uid but do not have right to remove user', function (done) {
@@ -92,6 +110,39 @@ describe('Users endpoints (authentication required)', function() {
 					done(err);
 				}
 			});
+	});
+
+	it('should be able to update the user object (name, sign and rooms)', function (done) {
+		TEST.agent
+			.put(`/api/v1/users/${TEST.users[0]._id}`)
+			.type('form')
+			.send({
+				name: 'name_changed',
+				sign: 'sign_changed',
+				rid: '5894d568d4f81c9d948aa20a'
+			})
+			.expect('Content-Type', /json/)
+			.expect(function (res) {
+				res.body.should.have.property('status', 'success');
+				res.body.data.should.have.property('name', 'name_changed');
+				res.body.data.should.have.property('sign', 'sign_changed');
+				res.body.data.rooms.should.contain("5894d568d4f81c9d948aa20a");
+			})
+			.expect(200, done);
+	});
+
+	it('should return 400 when uid invalid', function (done) {
+		TEST.agent
+			.put(`/api/v1/users/123`)
+			.expect('Content-Type', /json/)
+			.expect(400, done);
+	});
+
+	it('should return 404 when user does exist', function (done) {
+		TEST.agent
+			.put(`/api/v1/users/5894d568d4f81c9d948aa20a`)
+			.expect('Content-Type', /json/)
+			.expect(404, done);
 	});
 });
 

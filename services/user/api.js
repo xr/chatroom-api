@@ -5,11 +5,6 @@ const User = require('./models/users')
 	, Auth = require('../auth')
 	, UserModel = User.Model;
 
-/**
- * find user or create if not exist
- * @param {Object} opts
- * @return {document} newly created or existed user entity
- */
 exports.findOrCreate = function *(opts) {
 	let user;
 
@@ -29,11 +24,44 @@ exports.findOrCreate = function *(opts) {
 	return res;
 };
 
-/**
- * get user details
- * @param {Object} opts
- * @return {document} existed user entity
- */
+exports.update = function *(opts, fields) {
+	// authentication check
+	if (!opts.auth_user) {
+		throw new cError.Unauthorized();
+	}
+	
+	let user;
+
+	if (!utils.isValidId(opts.id)) {
+		throw new cError.BadRequest({
+			message: 'Invalid user id'
+		});
+	}
+
+	user = yield UserModel.findOne({ _id: opts.id }).exec();
+
+	if (!user) {
+		throw new cError.NotFound({ message: 'user does not exist' })
+	}
+
+	if ((opts.id.toString() === opts.auth_user._id.toString()) || Auth.isAdmin(opts.auth_user.id)) {
+		if (fields.name) {
+			user.name = fields.name;
+		}
+		if (fields.sign) {
+			user.sign = fields.sign;
+		}
+		if (fields.rid) {
+			user.rooms.push(fields.rid);
+		}
+		user.updated = Date.now();
+	} else {
+		throw new cError.Forbidden({ message: 'you do not have right to modify this user' });
+	}
+
+	return yield user.save();
+};
+
 exports.find = function *(opts) {
 
 	if (!utils.isValidId(opts.id)) {

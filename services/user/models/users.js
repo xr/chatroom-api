@@ -6,8 +6,12 @@ mongoose.Promise = require('bluebird');
 
 const UserSchema = new Schema({
   'name' : { type: String },
-  'fbid': { type: String, unique: true, required: true },
+  'fbid' : { type: String, unique: true, required: true },
   'sign' : { type: String },
+  'rooms' : [{
+    type: Schema.Types.ObjectId,
+    ref: 'rooms'
+  }],
   'blocked' : {type: Boolean, default: false },
   'created' : { type: Date, default: Date.now },
   'updated' : { type: Date, default: Date.now }
@@ -18,7 +22,8 @@ UserSchema.methods.publicUpdate = function(user, fields) {
   const updatableFields = [
     'name',
     'sign',
-    'updated'
+    'updated',
+    'rooms'
   ];
   for (const field in fields) {
     if (updatableFields.indexOf(field) !== -1) {

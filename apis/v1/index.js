@@ -185,6 +185,39 @@ API.get('/users/:id', function *() {
 });
 
 /**
+ * @api {put} /api/v1/users/:id updateUser
+ * @apiGroup User
+ * @apiPermission authenticated/admin
+ * @apiParam {String} id The user id
+ * @apiParam {String} [signature] The user signature
+ * * @apiParam {String} [rid] The room id if user join a room
+ * @apiDescription update the user details
+ * @apiError Unauthorized Login required
+ * @apiError BadRequest Invalid user id
+ * @apiError NotFound User does not exist
+ * @apiError Forbidden You do not have right to modify this user
+ * @apiSuccessExample {json} Success-Response:
+ * {
+ * 	"status": "success",
+ * 	"data": {
+ * 		"_id": "5895abc7b9556ac3aada3d4f",
+ * 		"fbid": "facebook id",
+ * 		"name": "name",
+ * 		...
+ * 	}
+ * }
+ * 
+ */
+API.put('/users/:id', function *() {
+	console.log(`[PUT /users/${this.params.id} handler start]`);
+
+	this.body = {
+		'status': 'success',
+		'data': yield UserAPI.update({ id: this.params.id, auth_user: this.req.user }, this.request.body)
+	};
+});
+
+/**
  * @api {delete} /api/v1/users/:id deleteUser
  * @apiGroup User
  * @apiPermission admin
