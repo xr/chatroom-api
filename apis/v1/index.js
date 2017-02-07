@@ -259,7 +259,17 @@ API.delete('/users/:id', function *() {
  * @apiDescription send a message to one room.
  * @apiError Unauthorized Login required
  * @apiError BadRequest Missing rid or content field
- * 
+ * @apiSuccessExample {json} Success-Response:
+ * {
+ * 	"status": "success",
+ * 	"data": {
+ * 		content: 'message content',
+ * 		from: '589a372779bf5d17cd9b9480',
+ * 		rid: '5894d568d4f81c9d948aa20a',
+ * 		_id: '589a372879bf5d17cd9b9497',
+ * 		created: '2017-02-07T21:07:52.034Z'
+ * 	}
+ * }
  */
 API.post('/messages', function *() {
 	console.log(`[POST /messages handler start]`);
