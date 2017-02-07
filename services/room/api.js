@@ -61,9 +61,10 @@ exports.upsert = function *(opts, fields) {
 		, room
 		, data = {};
 
-	if (opts.id) {
+	if (opts.id || fields.uid) {
 		// update
-		if (!utils.isValidId(opts.id)) {
+		let id = opts.id || fields.uid;
+		if (!utils.isValidId(id)) {
 			throw new cError.BadRequest({
 				message: 'invalid room id'
 			});	
@@ -82,6 +83,9 @@ exports.upsert = function *(opts, fields) {
 			if (fields.desc) {
 				room.desc = fields.desc;
 			}
+			if (fields.uid) {
+				room.users.push(fields.uid);
+			}
 		} else {
 			throw new cError.Forbidden({ message: 'you do not have right to modify this room' });
 		}
@@ -99,6 +103,7 @@ exports.upsert = function *(opts, fields) {
 		}
 
 		data.owner = opts.auth_user._id;
+		data.users = [opts.auth_user._id];
 		room = new RoomModel(data);
 	}
 

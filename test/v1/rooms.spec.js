@@ -79,6 +79,7 @@ describe('Rooms endpoints (authentication required)', function() {
 				res.body.data.should.have.property('title', 'test');
 				res.body.data.should.have.property('desc', 'test');
 				res.body.data.should.have.property('owner', TEST.users[0]._id.toString());
+				res.body.data.users.should.contain(TEST.users[0]._id.toString());
 			})
 			.expect(200, done);
 	});
@@ -130,13 +131,15 @@ describe('Rooms endpoints (authentication required)', function() {
 			.type('form')
 			.send({
 				title: 'test-changed',
-				desc: 'test-changed'
+				desc: 'test-changed',
+				uid: '5894d568d4f81c9d948aa20a'
 			})
 			.expect('Content-Type', /json/)
 			.expect(function (res) {
 				res.body.should.have.property('status', 'success');
 				res.body.data.should.have.property('title', 'test-changed');
 				res.body.data.should.have.property('desc', 'test-changed');
+				res.body.data.users.should.contain("5894d568d4f81c9d948aa20a");
 			})
 			.expect(200, done);
 	});

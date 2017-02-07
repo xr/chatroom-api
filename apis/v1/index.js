@@ -129,6 +129,9 @@ API.post('/rooms', function *() {
  * @apiGroup Room
  * @apiPermission authenticated/admin
  * @apiParam {String} id The room id
+ * @apiParam {String} [title] The room title
+ * @apiParam {String} [desc] The room description
+ * @apiParam {String} [uid] User id who joined the room
  * @apiDescription update the room information.
  * @apiError Unauthorized Login required
  * @apiError BadRequest Invalid room id
