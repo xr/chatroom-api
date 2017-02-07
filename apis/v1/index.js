@@ -21,7 +21,8 @@ exports = module.exports = API;
 
 // register services
 const RoomAPI = require('../../services/room/api')
-	, UserAPI = require('../../services/user/api');
+	, UserAPI = require('../../services/user/api')
+	, MessageAPI = require('../../services/message/api');
 
 /**
  * @api {get} /api/v1/auth/:name signIn
@@ -130,6 +131,7 @@ API.post('/rooms', function *() {
  * @apiPermission authenticated/admin
  * @apiParam {String} id The room id
  * @apiParam {String} [title] The room title
+ * @apiParam {String} [logo] The room's logo
  * @apiParam {String} [desc] The room description
  * @apiParam {String} [uid] User id who joined the room
  * @apiDescription update the room information.
@@ -248,3 +250,23 @@ API.delete('/users/:id', function *() {
 
 });
 
+/**
+ * @api {post} /api/v1/messages createMessage
+ * @apiGroup Message
+ * @apiPermission authenticated
+ * @apiParam {String} rid The room id where the message will send to
+ * @apiParam {String} content The message content
+ * @apiDescription send a message to one room.
+ * @apiError Unauthorized Login required
+ * @apiError BadRequest Missing rid or content field
+ * 
+ */
+API.post('/messages', function *() {
+	console.log(`[POST /messages handler start]`);
+
+	this.body = {
+		'status': 'success',
+		'data': yield MessageAPI.upsert({ auth_user: this.req.user }, this.request.body)
+	};
+
+});

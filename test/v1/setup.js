@@ -6,6 +6,7 @@ const request = require('supertest')
 	, passportMock = require('../mocks/passport-mock')
 	, UserModel = require('../../services/user/models/users').Model
 	, RoomModel = require('../../services/room/models/rooms').Model
+	, MessageModel = require('../../services/message/models/messages').Model
 	, db = require('mongoose').connection;
 
 let TEST = {
@@ -75,6 +76,7 @@ after(function (done) {
 	co(function *() {
 		yield UserModel.remove({});
 		yield RoomModel.remove({});
+		yield MessageModel.remove({});
 		done();
 	});
 });

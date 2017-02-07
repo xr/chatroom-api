@@ -1,5 +1,4 @@
 const mongoose = require('mongoose')
-	, config = require('../../../config')
 	, Schema = mongoose.Schema;
 
 // replace the mongoose built-in Promise lib due to the warning
