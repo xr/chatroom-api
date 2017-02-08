@@ -23,7 +23,10 @@ RoomSchema.virtual('_links').get(function () {
 	return {
 		'self': {
 			href: `api/v1/rooms/${this._id}`
-		}
+		},
+    'messages': {
+      href: `api/v1/messages?rid=${this._id}`
+    }
 	};
 })
 

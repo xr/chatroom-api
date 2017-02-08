@@ -86,11 +86,15 @@ describe('Users endpoints (authentication required)', function() {
 			}, done);
 	});
 
-	it('should return 403 when update others', function (done) {
+	it('should return 200 when only update rid', function (done) {
 		TEST.agent
 			.put(`/api/v1/users/${TEST.users[TEST.users.length - 1]._id}`)
+			.type('form')
+			.send({
+				rid: '5894d568d4f81c9d948aa20a'
+			})
 			.expect('Content-Type', /json/)
-			.expect(403, done);
+			.expect(200, done);
 	});
 
 	it('should pass the auth part and valid uid but do not have right to remove user', function (done) {

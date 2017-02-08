@@ -11,6 +11,7 @@ const validator = require('validator')
 	, cError = require('../error')
 	, Auth = require('../auth')
 	, utils = require('../utils')
+	, UserAPI = require('../user/api')
 	, RoomModel = Room.Model;
 
 /**
@@ -33,7 +34,7 @@ exports.find = function *(opts) {
 			});	
 		}
 		params._id = validator.escape(validator.trim(opts.id));
-		query = RoomModel.findOne(params);
+		query = RoomModel.findOne(params).populate('users');
 
 		return yield query.exec();
 	} else {
@@ -76,6 +77,7 @@ exports.upsert = function *(opts, fields) {
 
 	let res
 		, room
+		, userExistsInRoom = false
 		, data = {};
 
 	if (opts.id || fields.uid) {
@@ -94,7 +96,7 @@ exports.upsert = function *(opts, fields) {
 		}
 
 		if (fields.title || fields.desc || fields.logo) {
-			if ((room.owner.toString() === opts.auth_user._id.toString()) || Auth.isAdmin(opts.auth_user.id)) {
+			if ((room.owner.toString() === opts.auth_user.id) || Auth.isAdmin(opts.auth_user.id)) {
 				if (fields.title) {
 					room.title = fields.title;
 				}
@@ -110,7 +112,18 @@ exports.upsert = function *(opts, fields) {
 		}
 
 		if (fields.uid) {
-			room.users.push(fields.uid);
+			try {
+				yield UserAPI.find({ id: fields.uid });
+			} catch (e) {
+				throw e;
+			}
+
+			// check if uid already exists in the data.users array
+			userExistsInRoom = (room.users.indexOf(fields.uid) !== -1);
+
+			if (!userExistsInRoom) {
+				room.users.push(fields.uid);
+			}
 		}
 	} else {
 		// create
@@ -131,14 +144,21 @@ exports.upsert = function *(opts, fields) {
 
 		data.owner = opts.auth_user._id;
 		data.users = [opts.auth_user._id];
+
 		room = new RoomModel(data);
 	}
 
 	try {
 		res = yield room.save();
+		// update the user's rooms arr accordingly
+		if (!userExistsInRoom) {
+			yield UserAPI.update({ auth_user: opts.auth_user, id: fields.uid || opts.auth_user.id}, { rid: res._id.toString() });
+		}
 	} catch (e) {
 		if (e.code === 11000) {
 			throw new cError.Conflict({ message: 'room name already exists' });
+		} else {
+			throw e;
 		}
 	}
 

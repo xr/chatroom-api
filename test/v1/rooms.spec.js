@@ -170,6 +170,28 @@ describe('Rooms endpoints (authentication required)', function() {
 				'message': 'room name already exists'
 			}, done);
 	});
+	it('should return 404 when update the room with a not exists uid', function (done) {
+		TEST.agent
+			.put(`/api/v1/rooms/${testRoom._id}`)
+			.set('Accept', 'application/json')
+			.type('form')
+			.send({
+				uid: '5894d568d4f81c9d948aa20a'
+			})
+			.expect('Content-Type', /json/)
+			.expect(404, done);
+	});
+	it('should return 400 when update the room with an invalid uid', function (done) {
+		TEST.agent
+			.put(`/api/v1/rooms/${testRoom._id}`)
+			.set('Accept', 'application/json')
+			.type('form')
+			.send({
+				uid: '123'
+			})
+			.expect('Content-Type', /json/)
+			.expect(400, done);
+	});
 	it('should update the room', function (done) {
 		TEST.agent
 			.put(`/api/v1/rooms/${testRoom._id}`)
@@ -178,7 +200,7 @@ describe('Rooms endpoints (authentication required)', function() {
 			.send({
 				title: 'test-changed',
 				desc: 'test-changed',
-				uid: '5894d568d4f81c9d948aa20a',
+				uid: TEST.users[0]._id.toString(),
 				logo: 'http://logo.com/logo.png'
 			})
 			.expect('Content-Type', /json/)
@@ -187,7 +209,7 @@ describe('Rooms endpoints (authentication required)', function() {
 				res.body.data.should.have.property('title', 'test-changed');
 				res.body.data.should.have.property('desc', 'test-changed');
 				res.body.data.should.have.property('logo', 'http://logo.com/logo.png');
-				res.body.data.users.should.contain("5894d568d4f81c9d948aa20a");
+				res.body.data.users.should.contain(`${TEST.users[0]._id.toString()}`);
 			})
 			.expect(200, done);
 	});
@@ -197,12 +219,12 @@ describe('Rooms endpoints (authentication required)', function() {
 			.set('Accept', 'application/json')
 			.type('form')
 			.send({
-				uid: '5894d568d4f81c9d948aa20a'
+				uid: TEST.users[TEST.users.length - 2]._id.toString(),
 			})
 			.expect('Content-Type', /json/)
 			.expect(function (res) {
 				res.body.should.have.property('status', 'success');
-				res.body.data.users.should.contain('5894d568d4f81c9d948aa20a');
+				res.body.data.users.should.contain(`${TEST.users[TEST.users.length - 2]._id.toString()}`);
 			})
 			.expect(200, done);
 	});

@@ -29,7 +29,7 @@ exports.update = function *(opts, fields) {
 	if (!opts.auth_user) {
 		throw new cError.Unauthorized();
 	}
-	
+
 	let user;
 
 	if (!utils.isValidId(opts.id)) {
@@ -44,19 +44,23 @@ exports.update = function *(opts, fields) {
 		throw new cError.NotFound({ message: 'user does not exist' })
 	}
 
-	if ((opts.id.toString() === opts.auth_user._id.toString()) || Auth.isAdmin(opts.auth_user.id)) {
-		if (fields.name) {
-			user.name = fields.name;
+	if (fields.name || fields.sign) {
+		if ((opts.id.toString() === opts.auth_user._id.toString()) || Auth.isAdmin(opts.auth_user.id)) {
+			if (fields.name) {
+				user.name = fields.name;
+			}
+			if (fields.sign) {
+				user.sign = fields.sign;
+			}
+			user.updated = Date.now();
+		} else {
+			throw new cError.Forbidden({ message: 'you do not have right to modify this user' });
 		}
-		if (fields.sign) {
-			user.sign = fields.sign;
-		}
-		if (fields.rid) {
-			user.rooms.push(fields.rid);
-		}
+	}
+
+	if (fields.rid) {
+		user.rooms.push(fields.rid);
 		user.updated = Date.now();
-	} else {
-		throw new cError.Forbidden({ message: 'you do not have right to modify this user' });
 	}
 
 	return yield user.save();

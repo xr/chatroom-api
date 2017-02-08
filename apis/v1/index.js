@@ -72,6 +72,9 @@ API.get('/auth/:mode/callback', function *() {
  *				"_links": {
  *					"self": {
  *						"href": "api/v1/rooms/5895cd21bc62a4c4c18f0d4c"
+ *					},
+ *					"messages": {
+ *						"href": "api/v1/messages?rid=5895cd21bc62a4c4c18f0d4c"
  *					}
  *				},
  *				"id": "5895cd21bc62a4c4c18f0d4c"
@@ -160,8 +163,8 @@ API.post('/rooms', function *() {
  * @apiParam {String} [uid] User id who joined the room
  * @apiDescription update the room information.
  * @apiError Unauthorized Login required
- * @apiError BadRequest Invalid room id
- * @apiError NotFound Room does not exist
+ * @apiError BadRequest Invalid room/user id
+ * @apiError NotFound Room/uid does not exist
  * @apiError Forbidden You do not have right to modify this room
  * @apiSuccessExample {json} Success-Response:
  * {

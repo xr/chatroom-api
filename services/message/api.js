@@ -68,7 +68,11 @@ exports.upsert = function *(opts, fields) {
 			throw new cError.NotFound({ message: 'the room does not exist' })
 		}
 
-		if (room.users.indexOf(opts.auth_user.id) === -1) {
+		let found = room.users.find((user) => {
+			return user._id.toString() === opts.auth_user.id;
+		});
+
+		if (!found) {
 			throw new cError.Forbidden({ message: 'you do not have the right to post to this room' });
 		}
 
