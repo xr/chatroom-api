@@ -191,6 +191,21 @@ describe('Rooms endpoints (authentication required)', function() {
 			})
 			.expect(200, done);
 	});
+	it('should update the room users field even not the owner of the room', function (done) {
+		TEST.agent
+			.put(`/api/v1/rooms/${TEST.rooms[TEST.rooms.length - 1]._id}`)
+			.set('Accept', 'application/json')
+			.type('form')
+			.send({
+				uid: '5894d568d4f81c9d948aa20a'
+			})
+			.expect('Content-Type', /json/)
+			.expect(function (res) {
+				res.body.should.have.property('status', 'success');
+				res.body.data.users.should.contain('5894d568d4f81c9d948aa20a');
+			})
+			.expect(200, done);
+	});
 	it('should not update others room', function (done) {
 		TEST.agent
 			.put(`/api/v1/rooms/${TEST.rooms[1]._id}`)

@@ -93,21 +93,24 @@ exports.upsert = function *(opts, fields) {
 			throw new cError.NotFound({ message: 'room does not exist' })
 		}
 
-		if ((room.owner.toString() === opts.auth_user._id.toString()) || Auth.isAdmin(opts.auth_user.id)) {
-			if (fields.title) {
-				room.title = fields.title;
+		if (fields.title || fields.desc || fields.logo) {
+			if ((room.owner.toString() === opts.auth_user._id.toString()) || Auth.isAdmin(opts.auth_user.id)) {
+				if (fields.title) {
+					room.title = fields.title;
+				}
+				if (fields.desc) {
+					room.desc = fields.desc;
+				}
+				if (fields.logo) {
+					room.logo = fields.logo;
+				}
+			} else {
+				throw new cError.Forbidden({ message: 'you do not have right to modify this room' });
 			}
-			if (fields.desc) {
-				room.desc = fields.desc;
-			}
-			if (fields.uid) {
-				room.users.push(fields.uid);
-			}
-			if (fields.logo) {
-				room.logo = fields.logo;
-			}
-		} else {
-			throw new cError.Forbidden({ message: 'you do not have right to modify this room' });
+		}
+
+		if (fields.uid) {
+			room.users.push(fields.uid);
 		}
 	} else {
 		// create
