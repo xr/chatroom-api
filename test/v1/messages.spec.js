@@ -31,6 +31,7 @@ describe('Messages endpoints', function() {
 ==================================*/
 
 describe('Messages endpoints (authentication required)', function() {
+	let testMessage;
 	it('should return 400 when create message with wrong id', function(done) {
 		TEST.agent
 			.post('/api/v1/messages')
@@ -98,9 +99,24 @@ describe('Messages endpoints (authentication required)', function() {
 			})
 			.expect('Content-Type', /json/)
 			.expect(function (res) {
+				testMessage = res.body.data;
 				res.body.should.have.property('status', 'success');
 				res.body.data.should.have.property('content', 'message content');
 				res.body.data.should.have.property('rid', TEST.rooms[0]._id.toString());
+			})
+			.expect(200, done);
+	});
+	it('should get the messages based on room id', function (done) {
+		TEST.agent
+			.get(`/api/v1/messages?rid=${TEST.rooms[0]._id.toString()}`)
+			.set('Accept', 'application/json')
+			.expect('Content-Type', /json/)
+			.expect(function (res) {
+				res.body.should.have.property('status', 'success');
+				should.exist(res.body.data.page);
+				should.exist(res.body.data.per_page);
+				should.exist(res.body.data.messages);
+				res.body.data.messages.should.have.length.above(0);
 			})
 			.expect(200, done);
 	});

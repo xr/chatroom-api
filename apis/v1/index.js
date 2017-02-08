@@ -104,6 +104,8 @@ API.get('/rooms', function *() {
  * {
  * 	"status": "success"
  * 	"data": {
+ * 		...
+ * 	}
  * }
  * 
  */
@@ -303,4 +305,37 @@ API.post('/messages', function *() {
 		'data': yield MessageAPI.upsert({ auth_user: this.req.user }, this.request.body)
 	};
 
+});
+
+/**
+ * @api {get} /api/v1/messages getMessages
+ * @apiGroup Message
+ * @apiPermission authenticated
+ * @apiParam {Number} [page=1]
+ * @apiParam {Number} [per_page=10]
+ * @apiDescription get a list of messages based on conditions.
+ * @apiSuccessExample {json} Success-Response:
+ * {
+ * 	"status": "success"
+ * 	"data": {
+ * 		"page": 1,
+ * 		"per_page": 10,
+ *		"messages": [
+ *			...
+ *		]
+ * 	}
+ * }
+ * 
+ */
+API.get('/messages', function *() {
+	console.log('[GET /messages handler start]');
+
+	this.body = {
+		'status': 'success',
+		'data': yield MessageAPI.find({
+			page: Number(this.request.query.page) || 1,
+			per_page: Number(this.request.query.per_page) || 10,
+			rid: this.request.query.rid || null
+		})
+	}
 });

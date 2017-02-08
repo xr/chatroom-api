@@ -15,7 +15,29 @@ const validator = require('validator')
 
 
 exports.find = function *(opts) {
-	// todo
+	let query
+		, res
+		, params = {};
+
+	// get collections
+	res = {
+		page: opts.page,
+		per_page: opts.per_page,
+		messages: []
+	};
+
+	if (!!opts.rid) {
+		params.rid = validator.escape(validator.trim(opts.rid));
+	}
+
+	query = MessageModel.find(params)
+			.populate('from')
+			.sort('-created')
+			.skip((res.page - 1) * res.per_page)
+			.limit(res.per_page);
+
+	res.messages = yield query.exec();
+	return res;
 };
 
 exports.upsert = function *(opts, fields) {
