@@ -95,6 +95,28 @@ API.get('/rooms', function *() {
 });
 
 /**
+ * @api {get} /api/v1/rooms/:id getRoom
+ * @apiGroup Room
+ * @apiPermission authenticated
+ * @apiParam {String} id room id
+ * @apiDescription get details of one room.
+ * @apiSuccessExample {json} Success-Response:
+ * {
+ * 	"status": "success"
+ * 	"data": {
+ * }
+ * 
+ */
+API.get('/rooms/:id', function *() {
+	console.log(`[GET /rooms/${this.params.id} handler start]`);
+
+	this.body = {
+		'status': 'success',
+		'data': yield RoomAPI.find({ auth_user: this.req.user, id: this.params.id })
+	};
+});
+
+/**
  * @api {post} /api/v1/rooms createRoom
  * @apiGroup Room
  * @apiPermission authenticated
@@ -259,6 +281,8 @@ API.delete('/users/:id', function *() {
  * @apiDescription send a message to one room.
  * @apiError Unauthorized Login required
  * @apiError BadRequest Missing rid or content field
+ * @apiError NotFound The room where send message to does not exist
+ * @apiError Forbidden You do not have the right to post to the room
  * @apiSuccessExample {json} Success-Response:
  * {
  * 	"status": "success",

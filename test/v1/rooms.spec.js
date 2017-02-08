@@ -54,6 +54,15 @@ describe('Rooms endpoints', function() {
 				message: 'unauthorized'
 			}, done);
 	});
+	it('should return 401 when get room without login', function (done) {
+		request(app)
+			.get('/api/v1/rooms/5894d568d4f81c9d948aa20a')
+			.expect('Content-Type', /json/)
+			.expect(401, {
+				status: 'error',
+				message: 'unauthorized'
+			}, done);
+	});
 });
 
 
@@ -63,6 +72,15 @@ describe('Rooms endpoints', function() {
 
 describe('Rooms endpoints (authentication required)', function() {
 	let testRoom;
+	it('should return 400 when get room with an invalid id', function (done) {
+		TEST.agent
+			.get('/api/v1/rooms/123')
+			.expect('Content-Type', /json/)
+			.expect(400, {
+				status: 'error',
+				message: 'invalid room id'
+			}, done);
+	});
 	it('should create new room', function (done) {
 		TEST.agent
 			.post('/api/v1/rooms')
@@ -82,6 +100,12 @@ describe('Rooms endpoints (authentication required)', function() {
 				res.body.data.should.have.property('private', false);
 				res.body.data.users.should.contain(TEST.users[0]._id.toString());
 			})
+			.expect(200, done);
+	});
+	it('should return 200 when get a right room', function (done) {
+		TEST.agent
+			.get(`/api/v1/rooms/${testRoom._id}`)
+			.expect('Content-Type', /json/)
 			.expect(200, done);
 	});
 	it('should create a private room', function (done) {

@@ -10,7 +10,8 @@ const validator = require('validator')
 	, Message = require('./models/messages')
 	, cError = require('../error')
 	, utils = require('../utils')
-	, MessageModel = Message.Model;
+	, MessageModel = Message.Model
+	, RoomAPI = require('../room/api');
 
 
 exports.find = function *(opts) {
@@ -35,9 +36,18 @@ exports.upsert = function *(opts, fields) {
 			throw new cError.BadRequest({ message: 'missing fields: rid or content.' });
 		}
 
-		// TODO: also need to check if the room exisits
 		if (!utils.isValidId(fields.rid)) {
 			throw new cError.BadRequest({ message: 'rid field incorrect format.' });
+		}
+
+		let room = yield RoomAPI.find({ id: fields.rid, auth_user: opts.auth_user });
+
+		if (!room) {
+			throw new cError.NotFound({ message: 'the room does not exist' })
+		}
+
+		if (room.users.indexOf(opts.auth_user.id) === -1) {
+			throw new cError.Forbidden({ message: 'you do not have the right to post to this room' });
 		}
 
 		data.content = validator.escape(validator.trim(fields.content));

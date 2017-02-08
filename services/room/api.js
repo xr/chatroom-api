@@ -19,29 +19,46 @@ const validator = require('validator')
  * @return {collections} or {document}
  */
 exports.find = function *(opts) {
-	let rooms
-		, query
+	let query
+		, res
 		, params = {};
 
-	let res = {
-		page: opts.page,
-		per_page: opts.per_page,
-		rooms: []
-	};
+	if (opts.id) {
+		if (!opts.auth_user) {
+			throw new cError.Unauthorized();
+		}
+		if (!utils.isValidId(opts.id)) {
+			throw new cError.BadRequest({
+				message: 'invalid room id'
+			});	
+		}
+		params._id = validator.escape(validator.trim(opts.id));
+		query = RoomModel.findOne(params);
 
-	if (!!opts.keyword) {
-		params.title = {'$regex': validator.escape(validator.trim(opts.keyword)), '$options': 'i'};
+		return yield query.exec();
+	} else {
+		// get collections
+		res = {
+			page: opts.page,
+			per_page: opts.per_page,
+			rooms: []
+		};
+
+		if (!!opts.keyword) {
+			params.title = {'$regex': validator.escape(validator.trim(opts.keyword)), '$options': 'i'};
+		}
+
+		query = RoomModel.find(params)
+				.populate('owner')
+				.sort('-created')
+				.where('removed').equals(false)
+				.skip((res.page - 1) * res.per_page)
+				.limit(res.per_page);
+
+		let rooms = yield query.exec();
+		res.rooms = rooms.map((r) => r.toObject({ virtuals: true, versionKey: false }));
 	}
 
-	query = RoomModel.find(params)
-			.populate('owner')
-			.sort('-created')
-			.where('removed').equals(false)
-			.skip((res.page - 1) * res.per_page)
-			.limit(res.per_page);
-
-	rooms = yield query.exec();
-	res.rooms = rooms.map((r) => r.toObject({ virtuals: true, versionKey: false }));
 	return res;
 };
 

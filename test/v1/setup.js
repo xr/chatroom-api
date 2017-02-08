@@ -33,7 +33,8 @@ before(function (done) {
 				let room = yield RoomModel.create({
 					title: Math.random().toString(36).slice(2),
 					desc: Math.random().toString(36).slice(2),
-					owner: user._id
+					owner: user._id,
+					users: [user._id]
 				});
 
 				TEST.users.push(user);
