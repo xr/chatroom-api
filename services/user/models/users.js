@@ -13,6 +13,7 @@ const UserSchema = new Schema({
     ref: 'rooms'
   }],
   'blocked' : {type: Boolean, default: false },
+  'online' : {type: Number, default: 0 },
   'created' : { type: Date, default: Date.now },
   'updated' : { type: Date, default: Date.now }
 });

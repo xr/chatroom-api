@@ -18,6 +18,7 @@ const config = require('./config')
 	, api = require('./apis')
 	, co = require('co')
 	, app = koa()
+	, userModel = require('./services/user/models/users').Model
 	, MongooseStore = require('koa-session-mongoose')
 	, sessionStore = new MongooseStore();
 
@@ -71,10 +72,12 @@ app.listen = function () {
 };
 
 const io = new socketIO(app.server);
+let uid;
 io.use((socket, next) => {
 	const sid = cookie.parse(socket.handshake.headers.cookie)['koa.sid'];
 	co(function *() {
 		const session = yield sessionStore.get(`koa:sess:${sid}`);
+		uid = session.passport.user;
 		if (session) {
 			next(null, true);	
 		} else {
@@ -99,6 +102,11 @@ io.on('connection', (socket) => {
 		
 		console.log('msg', msg);
 	});
+	socket.on('disconnect', function () {
+		console.log('user disconnect');
+		toggleStatus('offline', uid);
+	});
+	toggleStatus('online', uid);
 	console.log('[Socket server] connected.');
 });
 
@@ -143,3 +151,17 @@ app.on('uncaughtException', (err) => {
 	console.error('HTTP server/uncaughtException:', err);
 	exit(1);
 });
+
+/**
+ * @name update the user online/offline status
+ */
+function toggleStatus (type, uid) {
+	let updates = type === 'online' ? { online: 1 } : { online: 0 };
+	userModel.findByIdAndUpdate(uid, { $set: updates }, function (err, data) {
+		if (err) {
+			console.error(`${uid} ${type} failed! ${err}`);
+		} else {
+			console.log(`${uid} -> ${type}!`)
+		}
+	});
+}
