@@ -32,6 +32,15 @@ describe('Messages endpoints', function() {
 				message: 'unauthorized'
 			}, done);
 	});
+	it('should return 401 when update message without auth', function(done) {
+		request(app)
+			.put('/api/v1/messages/5894d568d4f81c9d948aa20a')
+			.expect('Content-Type', /json/)
+			.expect(401, {
+				status: 'error',
+				message: 'unauthorized'
+			}, done);
+	});
 });
 
 
@@ -53,6 +62,33 @@ describe('Messages endpoints (authentication required)', function() {
 			.expect(400, {
 				status: 'error',
 				message: 'rid field incorrect format.'
+			}, done);
+	});
+	it('should return 400 when update message with wrong id', function(done) {
+		TEST.agent
+			.put('/api/v1/messages/123')
+			.expect('Content-Type', /json/)
+			.expect(400, {
+				status: 'error',
+				message: 'invalid message id.'
+			}, done);
+	});
+	it('should return 404 when update message with none exists id', function(done) {
+		TEST.agent
+			.put('/api/v1/messages/5894d568d4f81c9d948aa20a')
+			.expect('Content-Type', /json/)
+			.expect(404, {
+				status: 'error',
+				message: 'message id not exists.'
+			}, done);
+	});
+	it('should return 403 when update others message', function(done) {
+		TEST.agent
+			.put(`/api/v1/messages/${TEST.messages[TEST.messages.length - 1]._id.toString()}`)
+			.expect('Content-Type', /json/)
+			.expect(403, {
+				status: 'error',
+				message: 'you do not have the right to update this message.'
 			}, done);
 	});
 	it('should return 400 when create message without content', function(done) {
@@ -113,6 +149,13 @@ describe('Messages endpoints (authentication required)', function() {
 				res.body.data.should.have.property('content', 'message content');
 				res.body.data.should.have.property('rid', TEST.rooms[0]._id.toString());
 			})
+			.expect(200, done);
+	});
+	it('should return 200 when update message', function (done) {
+		TEST.agent
+			.put(`/api/v1/messages/${testMessage._id}`)
+			.set('Accept', 'application/json')
+			.expect('Content-Type', /json/)
 			.expect(200, done);
 	});
 	it('should get the messages based on room id', function (done) {

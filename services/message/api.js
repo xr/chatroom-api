@@ -57,7 +57,24 @@ exports.upsert = function *(opts, fields) {
 		,data = {};
 
 	if (opts.id) {
-		//TODO if edit messages functionality required
+		if (!utils.isValidId(opts.id)) {
+			throw new cError.BadRequest({ message: 'invalid message id.' });
+		}
+		let message = yield MessageModel.findOne({
+			_id: opts.id
+		}).exec();
+
+		if (!message) {
+			throw new cError.NotFound({ message: 'message id not exists.' })
+		}
+
+		if (message.to.toString() !== opts.auth_user.id) {
+			throw new cError.Forbidden({ message: 'you do not have the right to update this message.' });
+		}
+
+		message.read = 1;
+
+		res = yield message.save();
 		
 	} else {
 		// create
@@ -88,8 +105,9 @@ exports.upsert = function *(opts, fields) {
 		data.rid = fields.rid;
 
 		for (let i = 0; i < room.users.length; i++) {
+			data.read = 0;
 			if (room.users[i]._id.toString() === opts.auth_user.id) {
-				data.read = true;	
+				data.read = 1;
 			}
 			data.to = room.users[i]._id;
 			message = new MessageModel(data);

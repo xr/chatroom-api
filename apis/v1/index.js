@@ -283,7 +283,7 @@ API.delete('/users/:id', function *() {
  * @apiPermission authenticated
  * @apiParam {String} rid The room id where the message will send to
  * @apiParam {String} content The message content
- * @apiDescription send a message to one room.
+ * @apiDescription send a message to one room
  * @apiError Unauthorized Login required
  * @apiError BadRequest Missing rid or content field
  * @apiError NotFound The room where send message to does not exist
@@ -306,6 +306,42 @@ API.post('/messages', function *() {
 	this.body = {
 		'status': 'success',
 		'data': yield MessageAPI.upsert({ auth_user: this.req.user }, this.request.body)
+	};
+
+});
+
+/**
+ * @api {put} /api/v1/messages/:id updateMessage
+ * @apiGroup Message
+ * @apiPermission authenticated
+ * @apiParam {String} id The message id
+ * @apiDescription update the message. Note: currently only support update message read status, empty payload required.
+ * @apiError Unauthorized Login required
+ * @apiError BadRequest Invalid message id. Note: empty payload will mark message as read(1)
+ * @apiError NotFound The message id not found
+ * @apiError Forbidden You do not have the right to update the message
+ * @apiSuccessExample {json} Success-Response:
+ * {
+ * 	"status": "success",
+ * 	"data": {
+ * 		"_id": "589cd34f6e2da106678105ae",
+ * 		"content": "hello",
+ * 		"from": "589b78d0126f4d5825056055",
+ * 		"rid": "589b7a3187525658bc826301",
+ * 		"to": "589b78d0126f4d5825056055",
+ * 		"__v": 0,
+ * 		"created": "2017-02-09T20:38:39.678Z",
+ * 		"updated": "2017-02-09T20:38:39.678Z",
+ * 		"read": 1
+ * 	}
+ * }
+ */
+API.put('/messages/:id', function *() {
+	console.log(`[PUT /messages/${this.params.id} handler start]`);
+
+	this.body = {
+		'status': 'success',
+		'data': yield MessageAPI.upsert({ auth_user: this.req.user, id: this.params.id })
 	};
 
 });

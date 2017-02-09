@@ -12,6 +12,7 @@ const request = require('supertest')
 let TEST = {
 	users: [],
 	rooms: [],
+	messages: [],
 	agent: agent
 };
 
@@ -37,8 +38,15 @@ before(function (done) {
 					users: [user._id]
 				});
 
+				let message = yield MessageModel.create({
+					content: 'test',
+					from: user._id,
+					to: user._id
+				});
+
 				TEST.users.push(user);
 				TEST.rooms.push(room);
+				TEST.messages.push(message);
 			}
 
 			// each one create one room
