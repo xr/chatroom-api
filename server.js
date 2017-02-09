@@ -19,6 +19,7 @@ const config = require('./config')
 	, co = require('co')
 	, app = koa()
 	, userModel = require('./services/user/models/users').Model
+	, roomAPI = require('./services/room/api')
 	, MongooseStore = require('koa-session-mongoose')
 	, sessionStore = new MongooseStore();
 
@@ -101,6 +102,7 @@ io.on('connection', (socket) => {
 		// Therefore, from this point on, just trust the uid from client side and do whatever.
 		
 		console.log('msg', msg);
+		pubEvents(socket, msg);
 	});
 	socket.on('disconnect', function () {
 		console.log('user disconnect');
@@ -164,4 +166,29 @@ function toggleStatus (type, uid) {
 			console.log(`${uid} -> ${type}!`)
 		}
 	});
+}
+
+/**
+ * @name handle the sockets events publish
+ */
+function pubEvents(socket, msg) {
+	let opts = {
+		auth_user: {
+			id: uid
+		}
+	};
+	if (msg.rid) {
+		// send to the same socket first
+		socket.emit(uid, msg);
+
+		// then get all the others
+		let room;
+		opts.id = msg.rid;
+		co(function *() {
+			room = yield roomAPI.find(opts);
+			room.users.forEach((user) => {
+				socket.broadcast.emit(user._id.toString(), msg);
+			});
+		});
+	}
 }
