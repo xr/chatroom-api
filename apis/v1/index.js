@@ -386,7 +386,7 @@ API.get('/messages', function *() {
  * @apiGroup Notification
  * @apiPermission authenticated
  * @apiDescription get a list of notifications for the user.
- * * @apiError Unauthorized Login required
+ * @apiError Unauthorized Login required
  * @apiSuccessExample {json} Success-Response:
  * {
  * 	"status": "success"
