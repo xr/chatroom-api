@@ -3,7 +3,8 @@ const User = require('./models/users')
 	, cError = require('../error')	
 	, utils = require('../utils')
 	, Auth = require('../auth')
-	, UserModel = User.Model;
+	, UserModel = User.Model
+	, MessageAPI = require('../message/api');
 
 exports.findOrCreate = function *(opts) {
 	let user;
@@ -85,7 +86,7 @@ exports.find = function *(opts) {
 	}
 
 	return user;
-}
+};
 
 exports.remove = function *(opts) {
 	if (!opts.auth_user) {
@@ -107,4 +108,31 @@ exports.remove = function *(opts) {
 	}).exec();
 
 	return user;
+};
+
+exports.getNotifications = function *(opts) {
+	if (!opts.auth_user) {
+		throw new cError.Unauthorized();
+	}
+	
+	let res = [];
+
+	let user = yield UserModel.findOne({
+		'_id': opts.auth_user.id
+	}).populate('rooms', '_id title desc logo private').exec();
+
+	for (let i = 0; i < user.rooms.length; i++) {
+		let notification = {};
+		let roomMessages = yield MessageAPI.find({
+			rid: user.rooms[i]._id.toString(),
+			auth_user: opts.auth_user,
+			page: 1,
+			per_page: 10
+		});
+		notification['messages'] = roomMessages.messages;
+		notification['room'] = user.rooms[i];
+		res.push(notification);
+	}
+
+	return res;
 }

@@ -23,6 +23,15 @@ describe('Messages endpoints', function() {
 				message: 'unauthorized'
 			}, done);
 	});
+	it('should return 401 when get message without auth', function(done) {
+		request(app)
+			.get('/api/v1/messages')
+			.expect('Content-Type', /json/)
+			.expect(401, {
+				status: 'error',
+				message: 'unauthorized'
+			}, done);
+	});
 });
 
 

@@ -50,7 +50,7 @@ exports.find = function *(opts) {
 		}
 
 		query = RoomModel.find(params)
-				.populate('owner')
+				.populate('owner', 'fbid name')
 				.sort('-created')
 				.where('removed').equals(false)
 				.skip((res.page - 1) * res.per_page)

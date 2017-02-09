@@ -68,6 +68,17 @@ describe('Users endpoints', function() {
 				message: 'unauthorized'
 			}, done);
 	});
+
+	it('should return 401 when get user notifications without login', function (done) {
+		request(app)
+			.get(`/api/v1/notifications`)
+			.set('Accept', 'application/json')
+			.expect('Content-Type', /json/)
+			.expect(401, {
+				status: 'error',
+				message: 'unauthorized'
+			}, done);
+	});
 });
 
 /*=====================================
@@ -147,6 +158,13 @@ describe('Users endpoints (authentication required)', function() {
 			.put(`/api/v1/users/5894d568d4f81c9d948aa20a`)
 			.expect('Content-Type', /json/)
 			.expect(404, done);
+	});
+
+	it('should return 200 when user get notifications', function (done) {
+		TEST.agent
+			.get(`/api/v1/notifications`)
+			.expect('Content-Type', /json/)
+			.expect(200, done);
 	});
 });
 

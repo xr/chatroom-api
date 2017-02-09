@@ -15,6 +15,9 @@ const validator = require('validator')
 
 
 exports.find = function *(opts) {
+	if (!opts.auth_user) {
+		throw new cError.Unauthorized();
+	}
 	let query
 		, res
 		, params = {};
@@ -30,8 +33,11 @@ exports.find = function *(opts) {
 		params.rid = validator.escape(validator.trim(opts.rid));
 	}
 
+	params.to = opts.auth_user.id;
+
 	query = MessageModel.find(params)
-			.populate('from')
+			.populate('from', 'fbid name created')
+			.sort('read')
 			.sort('-created')
 			.skip((res.page - 1) * res.per_page)
 			.limit(res.per_page);
@@ -47,6 +53,7 @@ exports.upsert = function *(opts, fields) {
 	}
 
 	let message
+		, res
 		,data = {};
 
 	if (opts.id) {
@@ -79,8 +86,16 @@ exports.upsert = function *(opts, fields) {
 		data.content = validator.escape(validator.trim(fields.content));
 		data.from = opts.auth_user._id;
 		data.rid = fields.rid;
-		message = new MessageModel(data);
+
+		for (let i = 0; i < room.users.length; i++) {
+			if (room.users[i]._id.toString() === opts.auth_user.id) {
+				data.read = true;	
+			}
+			data.to = room.users[i]._id;
+			message = new MessageModel(data);
+			res = yield message.save();
+		}
 	}
 
-	return yield message.save();
+	return res;
 }

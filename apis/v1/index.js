@@ -316,6 +316,7 @@ API.post('/messages', function *() {
  * @apiPermission authenticated
  * @apiParam {Number} [page=1]
  * @apiParam {Number} [per_page=10]
+ * @apiParam {String} [rid] room id
  * @apiDescription get a list of messages based on conditions.
  * @apiSuccessExample {json} Success-Response:
  * {
@@ -338,7 +339,49 @@ API.get('/messages', function *() {
 		'data': yield MessageAPI.find({
 			page: Number(this.request.query.page) || 1,
 			per_page: Number(this.request.query.per_page) || 10,
+			auth_user: this.req.user,
 			rid: this.request.query.rid || null
 		})
 	}
+});
+
+/**
+ * @api {get} /api/v1/notifications getNotifications
+ * @apiGroup Notification
+ * @apiPermission authenticated
+ * @apiDescription get a list of notifications for the user.
+ * * @apiError Unauthorized Login required
+ * @apiSuccessExample {json} Success-Response:
+ * {
+ * 	"status": "success"
+ * 	"data": [
+ * 		"messages": [
+ * 			{
+ * 				"_id": "589cc29bc3f3de032a1293eb",
+ * 				"content": "content",
+ * 				"from": {
+ * 					...
+ * 				},
+ * 				...
+ * 				"to": "xxx",
+ * 				...
+ * 				"read": 0
+ * 			}
+ * 		],
+ * 		"room": {
+ * 			...
+ * 		}
+ * 	]
+ * }
+ * 
+ */
+API.get('/notifications', function *() {
+	console.log('[GET /notifications handler start]');
+
+	this.body = {
+		'status': 'success',
+		'data': yield UserAPI.getNotifications({
+			auth_user: this.req.user
+		})
+	};
 });
