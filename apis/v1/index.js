@@ -191,7 +191,7 @@ API.put('/rooms/:id', function *() {
  * @api {get} /api/v1/users/:id getUser
  * @apiGroup User
  * @apiPermission none
- * @apiParam {String} id The user id
+ * @apiParam {String} id The user id or 'me'
  * @apiDescription get the user details
  * @apiError BadRequest Invalid user id
  * @apiError NotFound User does not exist
@@ -212,7 +212,7 @@ API.get('/users/:id', function *() {
 
 	this.body = {
 		'status': 'success',
-		'data': yield UserAPI.find({ id: this.params.id })
+		'data': yield UserAPI.find({ auth_user: this.req.user, id: this.params.id })
 	};
 });
 

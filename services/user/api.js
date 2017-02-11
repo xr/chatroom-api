@@ -68,11 +68,18 @@ exports.update = function *(opts, fields) {
 };
 
 exports.find = function *(opts) {
-
-	if (!utils.isValidId(opts.id)) {
-		throw new cError.BadRequest({
-			message: 'invalid user id'
-		});	
+	if (opts.id === 'me') {
+		if (opts.auth_user) {
+			opts.id = opts.auth_user.id;
+		} else {
+			throw new cError.Unauthorized();
+		}
+	} else {
+		if (!utils.isValidId(opts.id)) {
+			throw new cError.BadRequest({
+				message: 'invalid user id'
+			});
+		}
 	}
 
 	let user = yield UserModel.findOne({

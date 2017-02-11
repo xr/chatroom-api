@@ -58,6 +58,17 @@ describe('Users endpoints', function() {
 			}, done);
 	});
 
+	it('should return 401 when try to get me', function(done) {
+		request(app)
+			.delete(`/api/v1/users/me`)
+			.set('Accept', 'application/json')
+			.expect('Content-Type', /json/)
+			.expect(401, {
+				status: 'error',
+				message: 'unauthorized'
+			}, done);
+	});
+
 	it('should return 401 when update user without login', function (done) {
 		request(app)
 			.put(`/api/v1/users/${TEST.users[0]._id}`)
@@ -151,6 +162,13 @@ describe('Users endpoints (authentication required)', function() {
 			.put(`/api/v1/users/123`)
 			.expect('Content-Type', /json/)
 			.expect(400, done);
+	});
+
+	it('should return 200 when get me when authenticated', function (done) {
+		TEST.agent
+			.get(`/api/v1/users/me`)
+			.expect('Content-Type', /json/)
+			.expect(200, done);
 	});
 
 	it('should return 404 when user does exist', function (done) {
