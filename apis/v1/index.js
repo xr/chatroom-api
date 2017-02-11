@@ -315,9 +315,9 @@ API.post('/messages', function *() {
  * @apiGroup Message
  * @apiPermission authenticated
  * @apiParam {String} id The message id
- * @apiDescription update the message. Note: currently only support update message read status, empty payload required.
+ * @apiDescription update the message.
  * @apiError Unauthorized Login required
- * @apiError BadRequest Invalid message id. Note: empty payload will mark message as read(1)
+ * @apiError BadRequest Invalid message id.
  * @apiError NotFound The message id not found
  * @apiError Forbidden You do not have the right to update the message
  * @apiSuccessExample {json} Success-Response:
@@ -328,11 +328,9 @@ API.post('/messages', function *() {
  * 		"content": "hello",
  * 		"from": "589b78d0126f4d5825056055",
  * 		"rid": "589b7a3187525658bc826301",
- * 		"to": "589b78d0126f4d5825056055",
  * 		"__v": 0,
  * 		"created": "2017-02-09T20:38:39.678Z",
- * 		"updated": "2017-02-09T20:38:39.678Z",
- * 		"read": 1
+ * 		"updated": "2017-02-09T20:38:39.678Z"
  * 	}
  * }
  */

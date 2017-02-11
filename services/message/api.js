@@ -33,11 +33,8 @@ exports.find = function *(opts) {
 		params.rid = validator.escape(validator.trim(opts.rid));
 	}
 
-	params.to = opts.auth_user.id;
-
 	query = MessageModel.find(params)
 			.populate('from', 'fbid name created')
-			.sort('read')
 			.sort('-created')
 			.skip((res.page - 1) * res.per_page)
 			.limit(res.per_page);
@@ -68,11 +65,9 @@ exports.upsert = function *(opts, fields) {
 			throw new cError.NotFound({ message: 'message id not exists.' })
 		}
 
-		if (message.to.toString() !== opts.auth_user.id) {
+		if (message.from.toString() !== opts.auth_user.id) {
 			throw new cError.Forbidden({ message: 'you do not have the right to update this message.' });
 		}
-
-		message.read = 1;
 
 		res = yield message.save();
 		
@@ -103,16 +98,8 @@ exports.upsert = function *(opts, fields) {
 		data.content = validator.escape(validator.trim(fields.content));
 		data.from = opts.auth_user._id;
 		data.rid = fields.rid;
-
-		for (let i = 0; i < room.users.length; i++) {
-			data.read = 0;
-			if (room.users[i]._id.toString() === opts.auth_user.id) {
-				data.read = 1;
-			}
-			data.to = room.users[i]._id;
-			message = new MessageModel(data);
-			res = yield message.save();
-		}
+		message = new MessageModel(data);
+		res = yield message.save();
 	}
 
 	return res;
