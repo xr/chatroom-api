@@ -60,7 +60,9 @@ exports.update = function *(opts, fields) {
 	}
 
 	if (fields.rid) {
-		user.rooms.push(fields.rid);
+		if (user.rooms.indexOf(fields.rid) === -1) {
+			user.rooms.push(fields.rid);
+		}
 		user.updated = Date.now();
 	}
 
