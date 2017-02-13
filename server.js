@@ -105,9 +105,14 @@ io.on('connection', (socket) => {
 		pubEvents(socket, msg);
 	});
 	socket.on('disconnect', function () {
-		console.log('user disconnect');
-		socket.broadcast.emit('o2o');
-		toggleStatus('offline', uid);
+		// need to get uid again, otherwise, will affect the last-cached one (line 76)
+		const sid = cookie.parse(socket.handshake.headers.cookie)['koa.sid'];
+		co(function *() {
+			const session = yield sessionStore.get(`koa:sess:${sid}`);
+			let uid = session.passport.user;
+			socket.broadcast.emit('o2o');
+			toggleStatus('offline', uid);
+		 });
 	});
 	toggleStatus('online', uid);
 	socket.broadcast.emit('o2o');
