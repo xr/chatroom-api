@@ -106,9 +106,11 @@ io.on('connection', (socket) => {
 	});
 	socket.on('disconnect', function () {
 		console.log('user disconnect');
+		socket.broadcast.emit('o2o');
 		toggleStatus('offline', uid);
 	});
 	toggleStatus('online', uid);
+	socket.broadcast.emit('o2o');
 	console.log('[Socket server] connected.');
 });
 
