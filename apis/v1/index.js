@@ -256,8 +256,9 @@ API.get('/users/:id', function *() {
  * @apiGroup User
  * @apiPermission authenticated/admin
  * @apiParam {String} id The user id
+ * @apiParam {String} [name] The user name
  * @apiParam {String} [signature] The user signature
- * * @apiParam {String} [rid] The room id if user join a room
+ * @apiParam {String} [rid] The room id if user join a room
  * @apiDescription update the user details
  * @apiError Unauthorized Login required
  * @apiError BadRequest Invalid user id
