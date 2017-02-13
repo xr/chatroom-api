@@ -25,6 +25,14 @@ describe('Users endpoints', function() {
 			.expect(200, done);
 	});
 
+	it('should return 200 when get users', function(done) {
+		request(app)
+			.get(`/api/v1/users`)
+			.set('Accept', 'application/json')
+			.expect('Content-Type', /json/)
+			.expect(200, done);
+	});
+
 	it('should return 400 when use invalid uid', function(done) {
 		request(app)
 			.get('/api/v1/users/123')

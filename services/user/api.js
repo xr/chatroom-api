@@ -97,6 +97,30 @@ exports.find = function *(opts) {
 	return user;
 };
 
+exports.findAll = function *(opts) {
+	let query
+		, res
+		, params = {};
+
+	res = {
+		page: opts.page,
+		per_page: opts.per_page,
+		users: []
+	};
+
+	query = UserModel.find(params)
+		.select({ "rooms": 0})
+		.sort('-online')
+		.where('blocked').equals(false)
+		.skip((res.page - 1) * res.per_page)
+		.limit(res.per_page);
+
+	let users = yield query.exec();
+
+	res.users = users;
+	return res;
+};
+
 exports.remove = function *(opts) {
 	if (!opts.auth_user) {
 		throw new cError.Unauthorized();

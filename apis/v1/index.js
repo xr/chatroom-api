@@ -188,6 +188,41 @@ API.put('/rooms/:id', function *() {
 });
 
 /**
+ * @api {get} /api/v1/users getUsers
+ * @apiGroup User
+ * @apiParam {Number} [page=1]
+ * @apiParam {Number} [per_page=10]
+ * @apiPermission none
+ * @apiDescription get the users list
+ * @apiSuccessExample {json} Success-Response:
+ * {
+ * 	"status": "success",
+ * 	"data": {
+ * 		"page": 1,
+ * 		"per_page": 10,
+ * 		"users": [{
+ * 			"_id": "5895abc7b9556ac3aada3d4f",
+ * 			"fbid": "facebook id",
+ * 			"name": "name",
+ * 			...
+ * 		}]
+ * 	}
+ * }
+ * 
+ */
+API.get('/users', function *() {
+	console.log(`[GET /users handler start]`);
+
+	this.body = {
+		'status': 'success',
+		'data': yield UserAPI.findAll({
+			page: Number(this.request.query.page) || 1,
+			per_page: Number(this.request.query.per_page) || 10,
+		})
+	};
+});
+
+/**
  * @api {get} /api/v1/users/:id getUser
  * @apiGroup User
  * @apiPermission none
