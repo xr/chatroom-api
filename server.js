@@ -100,8 +100,6 @@ io.on('connection', (socket) => {
 		// him/herself before
 		// 
 		// Therefore, from this point on, just trust the uid from client side and do whatever.
-		
-		console.log('msg', msg);
 		pubEvents(socket, msg);
 	});
 	socket.on('disconnect', function () {
