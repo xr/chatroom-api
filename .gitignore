@@ -6,3 +6,4 @@ npm-debug.log
 /tmp
 doc.md
 env.txt
+.env

@@ -4,13 +4,16 @@
   "description": "chat service api",
   "main": "index.js",
   "scripts": {
-    "start": "./node_modules/.bin/nf start -e ./env.txt",
+    "start": "./node_modules/.bin/nf start -e .env",
     "test": "./node_modules/.bin/mocha ./test/config.js ./test/index.js --reporter spec",
     "doc": "apidoc -f apis/v1/index.js -o ./doc"
   },
   "author": "liang",
   "license": "ISC",
   "repository": {},
+  "engines": {
+    "node": "6.9.1"
+  },
   "dependencies": {
     "bluebird": "^3.4.7",
     "chai": "^3.5.0",
