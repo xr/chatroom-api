@@ -5,7 +5,7 @@ const config = {
 		port: process.env.PORT || 9080,
 		basePath: process.env.API_SERVER_BASEPATH  || '/api/',
 		secrets: [process.env.API_SERVER_SECRET || 'whatever'],
-		extURL: process.env.API_SERVER_EXTURL || 'http://chat.loveyoung.me:9080/api/v1'
+		extURL: process.env.API_SERVER_EXTURL || 'http://chat.loveyoung.me/api/v1'
 	},
 	mongo: {
 		url: process.env.API_SERVER_MONGODB_URL || 'mongodb://localhost:27017/chat'
