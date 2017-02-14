@@ -17,6 +17,8 @@ const config = require('./config')
 	, koa = require('koa')
 	, api = require('./apis')
 	, co = require('co')
+	, staticServe = require('koa-static')
+	, addTrailingSlashes = require('koa-add-trailing-slashes')
 	, app = koa()
 	, userModel = require('./services/user/models/users').Model
 	, roomAPI = require('./services/room/api')
@@ -142,6 +144,13 @@ for (let a in api) {
 	app.use(mount(route, api[a]));
 }
 
+
+/**
+ * @name Static files mounting
+ */
+app.use(addTrailingSlashes());
+app.use(mount('/', staticServe('ui')));
+app.use(mount('/doc', staticServe('doc')));
 
 /**
  * Kick start
