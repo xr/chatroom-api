@@ -53,6 +53,7 @@ exports.find = function *(opts) {
 				.populate('owner', 'fbid name')
 				.sort('-created')
 				.where('removed').equals(false)
+				.where('private').equals(false)
 				.skip((res.page - 1) * res.per_page)
 				.limit(res.per_page);
 

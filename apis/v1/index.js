@@ -39,8 +39,20 @@ API.get('/auth/:mode', function *() {
 API.get('/auth/:mode/callback', function *() {
 	yield passport.authenticate(this.params.mode, {
 		successRedirect: config.app.url,
-		failureRedirect: `${config.app.url}/login?error=1`
+		failureRedirect: `${config.app.url}/?error=1`
 	});
+});
+
+/**
+ * @api {get} /api/v1/logout signOut
+ * @apiGroup Auth
+ * @apiPermission none
+ * @apiDescription logout
+ * 
+ */
+API.get('/logout', function *() {
+	this.session = null;
+	this.redirect(config.app.url);
 });
 
 
@@ -127,6 +139,7 @@ API.get('/rooms/:id', function *() {
  * @apiPermission authenticated
  * @apiParam {String} title The room title
  * @apiParam {String} [desc] The room description
+ * @apiParam {String} [private] If set then create a private room
  * @apiDescription create a new room.
  * @apiError Unauthorized Login required
  * @apiError BadRequest You must give a title
