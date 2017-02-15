@@ -139,6 +139,7 @@ API.get('/rooms/:id', function *() {
  * @apiPermission authenticated
  * @apiParam {String} title The room title
  * @apiParam {String} [desc] The room description
+ * @apiParam {String} [logo] The room logo
  * @apiParam {String} [private] If set then create a private room
  * @apiDescription create a new room.
  * @apiError Unauthorized Login required

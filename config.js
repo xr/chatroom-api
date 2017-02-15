@@ -11,7 +11,7 @@ const config = {
 		url: process.env.API_SERVER_MONGODB_URL || 'mongodb://localhost:27017/chat'
 	},
 	app: {
-		url: 'http://chat.loveyoung.me'
+		url: process.env.APP_URL || 'http://chat.loveyoung.me'
 	},
 	oauth: {
 		fb: {

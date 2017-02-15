@@ -139,6 +139,10 @@ exports.upsert = function *(opts, fields) {
 			data.desc = validator.escape(validator.trim(fields.desc));
 		}
 
+		if (fields.logo) {
+			data.logo = fields.logo;
+		}
+
 		if (fields.private) {
 			data.private = true;
 		}
