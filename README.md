@@ -2,6 +2,9 @@
 
 This is the chat api repo, but `ui` folder contains released version frontend code, it is only used for the deployment purpose, try to serve the frontend and backend at the same time.
 
+## API Documentation
+[click here](http://chat.loveyoung.me/doc/)
+
 ## installation 
 
 ```
