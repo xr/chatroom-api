@@ -23,9 +23,10 @@ const LocalStrategy = require('passport-local').Strategy;
 passport.use(new LocalStrategy(function(username, password, done) {
   co(function *(){
     try {
+      const id = Math.floor(Math.random() * 10000) + 1;
       let user = yield UserAPI.findOrCreate({
-        id: '123',
-        displayName: 'Guest'
+        id: id,
+        displayName: 'Guest' + id
       });
       user.id = user._id;
       done(null, {
