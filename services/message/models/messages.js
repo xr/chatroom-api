@@ -10,6 +10,8 @@ var MessageSchema = new Schema({
   'content' : { type: String },
   'updated' : { type: Date, default: Date.now },
   'created' : { type: Date, default: Date.now }
+}, {
+  usePushEach: true
 });
 
 exports.Model = mongoose.model('messages', MessageSchema);

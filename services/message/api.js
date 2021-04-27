@@ -34,7 +34,7 @@ exports.find = function *(opts) {
 	}
 
 	query = MessageModel.find(params)
-			.populate('from', 'fbid name created')
+			.populate('from', 'fbid name avatar created')
 			.sort('-created')
 			.skip((res.page - 1) * res.per_page)
 			.limit(res.per_page);

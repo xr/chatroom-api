@@ -17,6 +17,8 @@ const UserSchema = new Schema({
   'online' : {type: Number, default: 0 },
   'created' : { type: Date, default: Date.now },
   'updated' : { type: Date, default: Date.now }
+}, {
+  usePushEach: true
 });
 
 // schama updatable fields
