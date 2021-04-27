@@ -33,7 +33,10 @@ const RoomAPI = require('../../services/room/api')
  * 
  */
 API.get('/auth/:mode', function *() {
-	yield passport.authenticate(this.params.mode);
+	yield passport.authenticate(this.params.mode, {
+		successRedirect: config.app.url,
+		failureRedirect: `${config.app.url}/?error=1`
+	});
 });
 
 API.get('/auth/:mode/callback', function *() {

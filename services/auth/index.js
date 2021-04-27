@@ -19,6 +19,25 @@ passport.deserializeUser(function(id, done) {
   });
 });
 
+const LocalStrategy = require('passport-local').Strategy;
+passport.use(new LocalStrategy(function(username, password, done) {
+  co(function *(){
+    try {
+      let user = yield UserAPI.findOrCreate({
+        id: '123',
+        displayName: 'Guest'
+      });
+      user.id = user._id;
+      done(null, {
+        id: user._id
+      });
+    } catch(err) {
+      done(err);
+    }
+  });
+}
+));
+
 const FacebookStrategy = require('passport-facebook').Strategy;
 
 passport.use(new FacebookStrategy({
@@ -36,6 +55,8 @@ passport.use(new FacebookStrategy({
     });
   }
 ));
+
+
 
 exports.isAdmin = function (id) {
   return config.admins.indexOf(id.toString()) !== -1;
