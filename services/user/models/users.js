@@ -8,6 +8,7 @@ const UserSchema = new Schema({
   'name' : { type: String },
   'fbid' : { type: String, unique: true, required: true },
   'sign' : { type: String },
+  'avatar': { type: String },
   'rooms' : [{
     type: Schema.Types.ObjectId,
     ref: 'rooms'

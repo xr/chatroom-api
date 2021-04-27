@@ -3,12 +3,14 @@ const User = require('./models/users')
 	, cError = require('../error')	
 	, utils = require('../utils')
 	, Auth = require('../auth')
+	, randomAvatarGenerator = require("random-avatar-generator")
 	, UserModel = User.Model
 	, MessageAPI = require('../message/api');
 
+const avatarGenerator = new randomAvatarGenerator.AvatarGenerator();
+
 exports.findOrCreate = function *(opts) {
 	let user;
-
 	let exists = yield UserModel.findOne({
 		'fbid': opts.id
 	}).exec();
@@ -19,6 +21,7 @@ exports.findOrCreate = function *(opts) {
 		user = new UserModel();
 		user.name = validator.trim(opts.displayName || opts.username);
 		user.fbid = opts.id;
+		user.avatar = avatarGenerator.generateRandomAvatar();
 	}
 
 	let res = yield user.save();

@@ -17,6 +17,8 @@ var RoomSchema = new Schema({
   'private' : { type: Boolean, default: false},
   'created' : { type: Date, default: Date.now },
   'updated' : { type: Date, default: Date.now }
+}, {
+  usePushEach: true
 });
 
 RoomSchema.virtual('_links').get(function () {
